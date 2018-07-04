@@ -46,7 +46,6 @@ size_t RawVertex::Difference(const RawVertex &other) const
     size_t attributes = 0;
     if (position != other.position) { attributes |= RAW_VERTEX_ATTRIBUTE_POSITION; }
     if (normal != other.normal) { attributes |= RAW_VERTEX_ATTRIBUTE_NORMAL; }
-    if (tangent != other.tangent) { attributes |= RAW_VERTEX_ATTRIBUTE_TANGENT; }
     if (binormal != other.binormal) { attributes |= RAW_VERTEX_ATTRIBUTE_BINORMAL; }
     if (color != other.color) { attributes |= RAW_VERTEX_ATTRIBUTE_COLOR; }
     if (uv0 != other.uv0) { attributes |= RAW_VERTEX_ATTRIBUTE_UV0; }
@@ -512,7 +511,6 @@ void RawModel::CreateMaterialModels(
                     }
                     if (mat.textures[RAW_TEXTURE_USAGE_NORMAL] != -1) {
                         keep |= RAW_VERTEX_ATTRIBUTE_NORMAL |
-                                RAW_VERTEX_ATTRIBUTE_TANGENT |
                                 RAW_VERTEX_ATTRIBUTE_BINORMAL |
                                 RAW_VERTEX_ATTRIBUTE_UV0;
                     }
@@ -526,7 +524,6 @@ void RawModel::CreateMaterialModels(
                 }
                 if ((keep & RAW_VERTEX_ATTRIBUTE_POSITION) == 0) { vertex.position = defaultVertex.position; }
                 if ((keep & RAW_VERTEX_ATTRIBUTE_NORMAL) == 0) { vertex.normal = defaultVertex.normal; }
-                if ((keep & RAW_VERTEX_ATTRIBUTE_TANGENT) == 0) { vertex.tangent = defaultVertex.tangent; }
                 if ((keep & RAW_VERTEX_ATTRIBUTE_BINORMAL) == 0) { vertex.binormal = defaultVertex.binormal; }
                 if ((keep & RAW_VERTEX_ATTRIBUTE_COLOR) == 0) { vertex.color = defaultVertex.color; }
                 if ((keep & RAW_VERTEX_ATTRIBUTE_UV0) == 0) { vertex.uv0 = defaultVertex.uv0; }

@@ -96,7 +96,7 @@ static unsigned int GetVertexSize(unsigned int format)
 	if (format & RAW_VERTEX_ATTRIBUTE_NORMAL) {
 		size += sizeof(float) * 3;
 	}
-	if (format & RAW_VERTEX_ATTRIBUTE_TANGENT) {
+	if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
 		size += sizeof(float) * 3;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
@@ -176,7 +176,7 @@ static bool ExportMesh(const char *szFileName, const RawModel &model, const RawM
 			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_NORMAL) {
 				vertices[index].normal = matrix * vertices[index].normal;
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_TANGENT) {
+			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
 				vertices[index].binormal = matrix * vertices[index].binormal;
 			}
 		}
@@ -217,7 +217,7 @@ static bool ExportMesh(const char *szFileName, const RawModel &model, const RawM
 				fwrite(&vertices[index].normal.y, sizeof(vertices[index].normal.y), 1, pFile);
 				fwrite(&vertices[index].normal.z, sizeof(vertices[index].normal.z), 1, pFile);
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_TANGENT) {
+			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
 				fwrite(&vertices[index].binormal.x, sizeof(vertices[index].binormal.x), 1, pFile);
 				fwrite(&vertices[index].binormal.y, sizeof(vertices[index].binormal.y), 1, pFile);
 				fwrite(&vertices[index].binormal.z, sizeof(vertices[index].binormal.z), 1, pFile);

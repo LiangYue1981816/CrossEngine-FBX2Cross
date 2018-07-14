@@ -255,20 +255,6 @@ static bool ExportMesh(const char *szFileName, const RawModel &model, const RawM
 	return true;
 }
 
-bool ExportMeshs(const char *szPathName, const RawModel &raw, bool bWorldSpace)
-{
-	std::vector<RawModel> materialModels;
-	raw.CreateMaterialModels(materialModels, false, -1, true);
-
-	for (int index = 0; index < materialModels.size(); index++) {
-		char szFileName[_MAX_PATH];
-		sprintf(szFileName, "%s/%s.mesh", szPathName, materialModels[index].GetSurface(0).name.c_str());
-		ExportMesh(szFileName, materialModels[index], raw, bWorldSpace);
-	}
-
-	return true;
-}
-
 static bool ExportMaterial(const char *szFileName, const RawMaterial &material, const RawModel &raw)
 {
 	FILE *pFile = fopen(szFileName, "wb");
@@ -276,22 +262,20 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 	{
 		fprintf(pFile, "<Material>\n");
 		{
-			/*
-			switch (material.type) {
-			case RAW_MATERIAL_TYPE_OPAQUE:
-				fprintf(pFile, "\t<Pass name=\"Opaque\" graphics=\"DiffuseForwardOpaquePresent.graphics\">\n");
-				break;
-			case RAW_MATERIAL_TYPE_TRANSPARENT:
-				fprintf(pFile, "\t<Pass name=\"Transparent\" graphics=\"DiffuseForwardTransparentPresent.graphics\">\n");
-				break;
-			case RAW_MATERIAL_TYPE_SKINNED_OPAQUE:
-				fprintf(pFile, "\t<Pass name=\"SkinOpaque\" graphics=\"DiffuseForwardSkinOpaquePresent.graphics\">\n");
-				break;
-			case RAW_MATERIAL_TYPE_SKINNED_TRANSPARENT:
-				fprintf(pFile, "\t<Pass name=\"SkinTransparent\" graphics=\"DiffuseForwardSkinTransparentPresent.graphics\">\n");
-				break;
-			}
-			*/
+			//switch (material.type) {
+			//case RAW_MATERIAL_TYPE_OPAQUE:
+			//	fprintf(pFile, "\t<Pass name=\"Opaque\" graphics=\"DiffuseForwardOpaquePresent.graphics\">\n");
+			//	break;
+			//case RAW_MATERIAL_TYPE_TRANSPARENT:
+			//	fprintf(pFile, "\t<Pass name=\"Transparent\" graphics=\"DiffuseForwardTransparentPresent.graphics\">\n");
+			//	break;
+			//case RAW_MATERIAL_TYPE_SKINNED_OPAQUE:
+			//	fprintf(pFile, "\t<Pass name=\"SkinOpaque\" graphics=\"DiffuseForwardSkinOpaquePresent.graphics\">\n");
+			//	break;
+			//case RAW_MATERIAL_TYPE_SKINNED_TRANSPARENT:
+			//	fprintf(pFile, "\t<Pass name=\"SkinTransparent\" graphics=\"DiffuseForwardSkinTransparentPresent.graphics\">\n");
+			//	break;
+			//}
 			{
 				for (int index = 0; index < RAW_TEXTURE_USAGE_MAX; index++) {
 					if (material.textures[index] != -1) {
@@ -304,9 +288,7 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 					}
 				}
 			}
-			/*
-			fprintf(pFile, "\t</Pass>\n");
-			*/
+			//fprintf(pFile, "\t</Pass>\n");
 		}
 		fprintf(pFile, "</Material>\n");
 	}
@@ -338,12 +320,26 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 	return true;
 }
 
-bool ExportMaterials(const char *szPathName, const RawModel &raw)
+bool ExportMeshs(const char *szPathName, const RawModel &rawModel, bool bWorldSpace)
 {
-	for (int index = 0; index < raw.GetMaterialCount(); index++) {
+	std::vector<RawModel> materialModels;
+	rawModel.CreateMaterialModels(materialModels, false, -1, true);
+
+	for (int index = 0; index < materialModels.size(); index++) {
 		char szFileName[_MAX_PATH];
-		sprintf(szFileName, "%s/%s.material", szPathName, raw.GetMaterial(index).name.c_str());
-		ExportMaterial(szFileName, raw.GetMaterial(index), raw);
+		sprintf(szFileName, "%s/%s.mesh", szPathName, materialModels[index].GetSurface(0).name.c_str());
+		ExportMesh(szFileName, materialModels[index], rawModel, bWorldSpace);
+	}
+
+	return true;
+}
+
+bool ExportMaterials(const char *szPathName, const RawModel &rawModel)
+{
+	for (int index = 0; index < rawModel.GetMaterialCount(); index++) {
+		char szFileName[_MAX_PATH];
+		sprintf(szFileName, "%s/%s.material", szPathName, rawModel.GetMaterial(index).name.c_str());
+		ExportMaterial(szFileName, rawModel.GetMaterial(index), rawModel);
 	}
 	return true;
 }

@@ -14,7 +14,7 @@
 #include <string>
 #include "RawModel.h"
 
-bool ExportMeshs(const char *szPathName, const RawModel &raw, bool bWorldSpace);
-bool ExportMaterials(const char *szPathName, const RawModel &raw);
+bool ExportMeshs(const char *szPathName, const RawModel &rawModel, bool bWorldSpace);
+bool ExportMaterials(const char *szPathName, const RawModel &rawModel);
 
 #endif // !__RAW2CROSS_H__

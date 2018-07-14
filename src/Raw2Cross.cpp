@@ -276,6 +276,7 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 	{
 		fprintf(pFile, "<Material>\n");
 		{
+			/*
 			switch (material.type) {
 			case RAW_MATERIAL_TYPE_OPAQUE:
 				fprintf(pFile, "\t<Pass name=\"Opaque\" graphics=\"DiffuseForwardOpaquePresent.graphics\">\n");
@@ -290,6 +291,7 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 				fprintf(pFile, "\t<Pass name=\"SkinTransparent\" graphics=\"DiffuseForwardSkinTransparentPresent.graphics\">\n");
 				break;
 			}
+			*/
 			{
 				for (int index = 0; index < RAW_TEXTURE_USAGE_MAX; index++) {
 					if (material.textures[index] != -1) {
@@ -298,11 +300,13 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 						char szFileName[_MAX_PATH];
 						splitfilename(raw.GetTexture(material.textures[index]).fileName.c_str(), szFName, szExt);
 						sprintf(szFileName, "%s%s", szFName, szExt);
-						fprintf(pFile, "\t\t<Texture2D name=\"%s\" value=\"%s\" />\n", Describe((RawTextureUsage)index).c_str(), szFileName);
+						fprintf(pFile, "\t\t<Texture2D file_name=\"%s\" name=\"%s\" min_filter=\"GL_LINEAR_MIPMAP_NEAREST\" mag_filter=\"GL_LINEAR\" address_mode=\"GL_CLAMP_TO_EDGE\" />\n", szFileName, Describe((RawTextureUsage)index).c_str());
 					}
 				}
 			}
+			/*
 			fprintf(pFile, "\t</Pass>\n");
+			*/
 		}
 		fprintf(pFile, "</Material>\n");
 	}
@@ -322,14 +326,12 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 
 	if (material.info->shadingModel == RAW_SHADING_MODEL_PBR_MET_ROUGH) {
 		const RawMetRoughMatProps *props = (RawMetRoughMatProps *)material.info.get();
-		int a = 0;
 	}
 	else {
 		const RawTraditionalMatProps *props = ((RawTraditionalMatProps *)material.info.get());
 
 		if (material.info->shadingModel == RAW_SHADING_MODEL_BLINN ||
 			material.info->shadingModel == RAW_SHADING_MODEL_PHONG) {
-
 		}
 	}
 

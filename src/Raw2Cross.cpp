@@ -320,15 +320,24 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 	return true;
 }
 
-bool ExportMeshs(const char *szPathName, const RawModel &rawModel, bool bWorldSpace)
+static char* GetModelFileName(char *szFileName, const char *szPathName, const RawModel &rawModel)
 {
-	std::vector<RawModel> materialModels;
-	rawModel.CreateMaterialModels(materialModels, false, -1, true);
+	sprintf(szFileName, "%s/%s.mesh", szPathName, rawModel.GetSurface(0).name.c_str());
+	return szFileName;
+}
 
-	for (int index = 0; index < materialModels.size(); index++) {
+static char* GetMaterialFileName(char *szFileName, const char *szPathName, const RawMaterial &rawMaterial)
+{
+	sprintf(szFileName, "%s/%s.material", szPathName, rawMaterial.name.c_str());
+	return szFileName;
+}
+
+bool ExportMeshs(const char *szPathName, const RawModel &rawModel, const std::vector<RawModel> &rawMaterialModels, bool bWorldSpace)
+{
+	for (int index = 0; index < rawMaterialModels.size(); index++) {
 		char szFileName[_MAX_PATH];
-		sprintf(szFileName, "%s/%s.mesh", szPathName, materialModels[index].GetSurface(0).name.c_str());
-		ExportMesh(szFileName, materialModels[index], rawModel, bWorldSpace);
+		GetModelFileName(szFileName, szPathName, rawMaterialModels[index]);
+		ExportMesh(szFileName, rawMaterialModels[index], rawModel, bWorldSpace);
 	}
 
 	return true;
@@ -338,8 +347,32 @@ bool ExportMaterials(const char *szPathName, const RawModel &rawModel)
 {
 	for (int index = 0; index < rawModel.GetMaterialCount(); index++) {
 		char szFileName[_MAX_PATH];
-		sprintf(szFileName, "%s/%s.material", szPathName, rawModel.GetMaterial(index).name.c_str());
+		GetMaterialFileName(szFileName, szPathName, rawModel.GetMaterial(index));
 		ExportMaterial(szFileName, rawModel.GetMaterial(index), rawModel);
 	}
+	return true;
+}
+
+bool ExportScene(const char *szPathName, const RawModel &rawModel, const std::vector<RawModel> &rawMaterialModels)
+{
+	char szFileName[_MAX_PATH];
+	sprintf(szFileName, "%s/Scene.xml", szPathName);
+
+	FILE *pFile = fopen(szFileName, "wb");
+	if (pFile == NULL) return false;
+	{
+		fprintf(pFile, "<Scene>\n");
+		{
+			for (int index = 0; index < rawMaterialModels.size(); index++) {
+				char szMeshFileName[_MAX_PATH];
+				char szMaterialFileName[_MAX_PATH];
+				GetModelFileName(szMeshFileName, "", rawMaterialModels[index]);
+				GetMaterialFileName(szMaterialFileName, "", rawMaterialModels[index].GetMaterial(0));
+				fprintf(pFile, "\t<Model mesh=\"%s\" material=\"%s\" />\n", szMeshFileName, szMaterialFileName);
+			}
+		}
+		fprintf(pFile, "</Scene>\n");
+	}
+	fclose(pFile);
 	return true;
 }

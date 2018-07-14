@@ -84,26 +84,30 @@ int main(int argc, char *argv[])
 		worldSpace = true;
 	}
 
-	RawModel raw;
+	RawModel rawModel;
 
 	if (verboseOutput) {
 		fmt::printf("Loading FBX File: %s\n", inputPath);
 	}
 
-    if (LoadFBXFile(raw, inputPath.c_str(), "bmp;png;jpg;jpeg") == false) {
+    if (LoadFBXFile(rawModel, inputPath.c_str(), "bmp;png;jpg;jpeg") == false) {
 		fmt::fprintf(stderr, "ERROR:: Failed to parse FBX: %s\n", inputPath.c_str());
         return 1;
     }
 
 	if (texturesTransforms.empty() == false) {
-		raw.TransformTextures(texturesTransforms);
+		rawModel.TransformTextures(texturesTransforms);
 	}
 
-    raw.Condense();
-    raw.TransformGeometry(ComputeNormalsOption::NEVER);
+	rawModel.Condense();
+	rawModel.TransformGeometry(ComputeNormalsOption::NEVER);
 
-	ExportMeshs(outputPath.c_str(), raw, worldSpace);
-	ExportMaterials(outputPath.c_str(), raw);
+	std::vector<RawModel> rawMaterialModels;
+	rawModel.CreateMaterialModels(rawMaterialModels, false, -1, true);
+
+	ExportMeshs(outputPath.c_str(), rawModel, rawMaterialModels, worldSpace);
+	ExportMaterials(outputPath.c_str(), rawModel);
+	ExportScene(outputPath.c_str(), rawModel, rawMaterialModels);
 
     return 0;
 }

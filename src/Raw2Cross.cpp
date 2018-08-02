@@ -120,6 +120,8 @@ static unsigned int GetVertexSize(unsigned int format)
 
 static bool ExportMesh(const char *szFileName, const RawModel &model, const RawModel &raw, bool bWorldSpace)
 {
+	unsigned int format = model.GetVertexAttributes();
+
 	MeshHeader header;
 	{
 		const unsigned int baseOffset = 44;
@@ -127,7 +129,7 @@ static bool ExportMesh(const char *szFileName, const RawModel &model, const RawM
 		header.indexBufferSize = model.GetTriangleCount() * 3 * sizeof(unsigned int);
 		header.indexBufferOffset = ALIGN_4BYTE(baseOffset);
 
-		header.vertexBufferSize = model.GetVertexCount() * GetVertexSize(model.GetVertexAttributes());
+		header.vertexBufferSize = model.GetVertexCount() * GetVertexSize(format);
 		header.vertexBufferOffset = ALIGN_4BYTE(baseOffset) + ALIGN_4BYTE(header.indexBufferSize);
 	}
 
@@ -170,15 +172,31 @@ static bool ExportMesh(const char *szFileName, const RawModel &model, const RawM
 		}
 
 		for (int index = 0; index < vertices.size(); index++) {
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_POSITION) {
+			if (format & RAW_VERTEX_ATTRIBUTE_POSITION) {
 				vertices[index].position = matrix * vertices[index].position;
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_NORMAL) {
+			if (format & RAW_VERTEX_ATTRIBUTE_NORMAL) {
 				vertices[index].normal = matrix * vertices[index].normal;
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
+			if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
 				vertices[index].binormal = matrix * vertices[index].binormal;
 			}
+		}
+	}
+
+	Bounds<float, 3> bounds;
+	{
+		bounds.min.x = bounds.min.y = bounds.min.z =  FLT_MAX;
+		bounds.max.x = bounds.max.y = bounds.max.z = -FLT_MAX;
+
+		for (int index = 0; index < vertices.size(); index++) {
+			if (bounds.min.x > vertices[index].position.x) bounds.min.x = vertices[index].position.x;
+			if (bounds.min.y > vertices[index].position.y) bounds.min.y = vertices[index].position.y;
+			if (bounds.min.z > vertices[index].position.z) bounds.min.z = vertices[index].position.z;
+
+			if (bounds.max.x < vertices[index].position.x) bounds.max.x = vertices[index].position.x;
+			if (bounds.max.y < vertices[index].position.y) bounds.max.y = vertices[index].position.y;
+			if (bounds.max.z < vertices[index].position.z) bounds.max.z = vertices[index].position.z;
 		}
 	}
 
@@ -187,10 +205,8 @@ static bool ExportMesh(const char *szFileName, const RawModel &model, const RawM
 	{
 		fwrite(&header, sizeof(header), 1, pFile);
 
-		unsigned int format = model.GetVertexAttributes();
 		fwrite(&format, sizeof(format), 1, pFile);
 
-		Bounds<float, 3> bounds = model.GetSurface(0).bounds;
 		fwrite(&bounds.min.x, sizeof(bounds.min.x), 1, pFile);
 		fwrite(&bounds.min.y, sizeof(bounds.min.y), 1, pFile);
 		fwrite(&bounds.min.z, sizeof(bounds.min.z), 1, pFile);
@@ -207,42 +223,42 @@ static bool ExportMesh(const char *szFileName, const RawModel &model, const RawM
 		WriteAlign(pFile);
 
 		for (int index = 0; index < vertices.size(); index++) {
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_POSITION) {
+			if (format & RAW_VERTEX_ATTRIBUTE_POSITION) {
 				fwrite(&vertices[index].position.x, sizeof(vertices[index].position.x), 1, pFile);
 				fwrite(&vertices[index].position.y, sizeof(vertices[index].position.y), 1, pFile);
 				fwrite(&vertices[index].position.z, sizeof(vertices[index].position.z), 1, pFile);
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_NORMAL) {
+			if (format & RAW_VERTEX_ATTRIBUTE_NORMAL) {
 				fwrite(&vertices[index].normal.x, sizeof(vertices[index].normal.x), 1, pFile);
 				fwrite(&vertices[index].normal.y, sizeof(vertices[index].normal.y), 1, pFile);
 				fwrite(&vertices[index].normal.z, sizeof(vertices[index].normal.z), 1, pFile);
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
+			if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
 				fwrite(&vertices[index].binormal.x, sizeof(vertices[index].binormal.x), 1, pFile);
 				fwrite(&vertices[index].binormal.y, sizeof(vertices[index].binormal.y), 1, pFile);
 				fwrite(&vertices[index].binormal.z, sizeof(vertices[index].binormal.z), 1, pFile);
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_COLOR) {
+			if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
 				fwrite(&vertices[index].color.x, sizeof(vertices[index].color.x), 1, pFile);
 				fwrite(&vertices[index].color.y, sizeof(vertices[index].color.y), 1, pFile);
 				fwrite(&vertices[index].color.z, sizeof(vertices[index].color.z), 1, pFile);
 //				fwrite(&vertices[index].color.w, sizeof(vertices[index].color.w), 1, pFile);
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_UV0) {
+			if (format & RAW_VERTEX_ATTRIBUTE_UV0) {
 				fwrite(&vertices[index].uv0.x, sizeof(vertices[index].uv0.x), 1, pFile);
 				fwrite(&vertices[index].uv0.y, sizeof(vertices[index].uv0.y), 1, pFile);
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_UV1) {
+			if (format & RAW_VERTEX_ATTRIBUTE_UV1) {
 				fwrite(&vertices[index].uv1.x, sizeof(vertices[index].uv1.x), 1, pFile);
 				fwrite(&vertices[index].uv1.y, sizeof(vertices[index].uv1.y), 1, pFile);
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_JOINT_INDICES) {
+			if (format & RAW_VERTEX_ATTRIBUTE_JOINT_INDICES) {
 				fwrite(&vertices[index].jointIndices.x, sizeof(vertices[index].jointIndices.x), 1, pFile);
 				fwrite(&vertices[index].jointIndices.y, sizeof(vertices[index].jointIndices.y), 1, pFile);
 				fwrite(&vertices[index].jointIndices.z, sizeof(vertices[index].jointIndices.z), 1, pFile);
 				fwrite(&vertices[index].jointIndices.w, sizeof(vertices[index].jointIndices.w), 1, pFile);
 			}
-			if (model.GetVertexAttributes() & RAW_VERTEX_ATTRIBUTE_JOINT_WEIGHTS) {
+			if (format & RAW_VERTEX_ATTRIBUTE_JOINT_WEIGHTS) {
 				fwrite(&vertices[index].jointWeights.x, sizeof(vertices[index].jointWeights.x), 1, pFile);
 				fwrite(&vertices[index].jointWeights.y, sizeof(vertices[index].jointWeights.y), 1, pFile);
 				fwrite(&vertices[index].jointWeights.z, sizeof(vertices[index].jointWeights.z), 1, pFile);

@@ -382,8 +382,8 @@ bool ExportScene(const char *szPathName, const RawModel &rawModel, const std::ve
 			for (int index = 0; index < rawMaterialModels.size(); index++) {
 				char szMeshFileName[_MAX_PATH];
 				char szMaterialFileName[_MAX_PATH];
-				GetModelFileName(szMeshFileName, "", rawMaterialModels[index]);
-				GetMaterialFileName(szMaterialFileName, "", rawMaterialModels[index].GetMaterial(0));
+				GetModelFileName(szMeshFileName, ".", rawMaterialModels[index]);
+				GetMaterialFileName(szMaterialFileName, ".", rawMaterialModels[index].GetMaterial(0));
 				fprintf(pFile, "\t<Model mesh=\"%s\" material=\"%s\" />\n", szMeshFileName, szMaterialFileName);
 			}
 		}

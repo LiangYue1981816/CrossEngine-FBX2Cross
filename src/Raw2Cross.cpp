@@ -369,7 +369,7 @@ bool ExportMaterials(const char *szPathName, const RawModel &rawModel)
 	return true;
 }
 
-bool ExportScene(const char *szPathName, const RawModel &rawModel, const std::vector<RawModel> &rawMaterialModels)
+bool ExportScene(const char *szPathName, const RawModel &rawModel)
 {
 	char szFileName[_MAX_PATH];
 	sprintf(szFileName, "%s/Scene.xml", szPathName);
@@ -379,13 +379,7 @@ bool ExportScene(const char *szPathName, const RawModel &rawModel, const std::ve
 	{
 		fprintf(pFile, "<Scene>\n");
 		{
-			for (int index = 0; index < rawMaterialModels.size(); index++) {
-				char szMeshFileName[_MAX_PATH];
-				char szMaterialFileName[_MAX_PATH];
-				GetModelFileName(szMeshFileName, ".", rawMaterialModels[index]);
-				GetMaterialFileName(szMaterialFileName, ".", rawMaterialModels[index].GetMaterial(0));
-				fprintf(pFile, "\t<Model mesh=\"%s\" material=\"%s\" />\n", szMeshFileName, szMaterialFileName);
-			}
+
 		}
 		fprintf(pFile, "</Scene>\n");
 	}

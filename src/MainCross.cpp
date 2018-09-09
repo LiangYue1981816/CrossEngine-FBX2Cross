@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
 	ExportMeshs(outputPath.c_str(), rawModel, rawMaterialModels, worldSpace);
 	ExportMaterials(outputPath.c_str(), rawModel);
-	ExportScene(outputPath.c_str(), rawModel, rawMaterialModels);
+	ExportScene(outputPath.c_str(), rawModel);
 
     return 0;
 }

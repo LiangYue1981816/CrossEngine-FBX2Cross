@@ -23,6 +23,8 @@
 #include "RawModel.h"
 #include "Raw2Cross.h"
 #include "PVRTGeometry.h"
+#include "tinyxml.h"
+#include "tinystr.h"
 
 #define ALIGN_BYTE(a, b) ((((a) + (b) - 1) / (b)) * (b))
 #define ALIGN_4BYTE(a)   ALIGN_BYTE(a, 4)
@@ -116,6 +118,20 @@ static unsigned int GetVertexSize(unsigned int format)
 	}
 
 	return size;
+}
+
+static std::string GetModelFileName(const char *szPathName, const RawSurface &rawSurface)
+{
+	char szFileName[_MAX_PATH];
+	sprintf(szFileName, "%s/%s.mesh", szPathName, rawSurface.name.c_str());
+	return std::string(szFileName);
+}
+
+static std::string GetMaterialFileName(const char *szPathName, const RawMaterial &rawMaterial)
+{
+	char szFileName[_MAX_PATH];
+	sprintf(szFileName, "%s/%s.material", szPathName, rawMaterial.name.c_str());
+	return std::string(szFileName);
 }
 
 static bool ExportMesh(const char *szFileName, const RawModel &model, const RawModel &raw, bool bWorldSpace)
@@ -271,118 +287,116 @@ static bool ExportMesh(const char *szFileName, const RawModel &model, const RawM
 	return true;
 }
 
-static bool ExportMaterial(const char *szFileName, const RawMaterial &material, const RawModel &raw)
-{
-	FILE *pFile = fopen(szFileName, "wb");
-	if (pFile == NULL) return false;
-	{
-		fprintf(pFile, "<Material>\n");
-		{
-			//switch (material.type) {
-			//case RAW_MATERIAL_TYPE_OPAQUE:
-			//	fprintf(pFile, "\t<Pass name=\"Opaque\" graphics=\"DiffuseForwardOpaquePresent.graphics\">\n");
-			//	break;
-			//case RAW_MATERIAL_TYPE_TRANSPARENT:
-			//	fprintf(pFile, "\t<Pass name=\"Transparent\" graphics=\"DiffuseForwardTransparentPresent.graphics\">\n");
-			//	break;
-			//case RAW_MATERIAL_TYPE_SKINNED_OPAQUE:
-			//	fprintf(pFile, "\t<Pass name=\"SkinOpaque\" graphics=\"DiffuseForwardSkinOpaquePresent.graphics\">\n");
-			//	break;
-			//case RAW_MATERIAL_TYPE_SKINNED_TRANSPARENT:
-			//	fprintf(pFile, "\t<Pass name=\"SkinTransparent\" graphics=\"DiffuseForwardSkinTransparentPresent.graphics\">\n");
-			//	break;
-			//}
-			{
-				for (int index = 0; index < RAW_TEXTURE_USAGE_MAX; index++) {
-					if (material.textures[index] != -1) {
-						char szExt[_MAX_PATH];
-						char szFName[_MAX_PATH];
-						char szFileName[_MAX_PATH];
-						splitfilename(raw.GetTexture(material.textures[index]).fileName.c_str(), szFName, szExt);
-						sprintf(szFileName, "%s%s", szFName, szExt);
-						fprintf(pFile, "\t\t<Texture2D file_name=\"%s\" name=\"%s\" min_filter=\"GL_LINEAR_MIPMAP_NEAREST\" mag_filter=\"GL_LINEAR\" address_mode=\"GL_CLAMP_TO_EDGE\" />\n", szFileName, Describe((RawTextureUsage)index).c_str());
-					}
-				}
-			}
-			//fprintf(pFile, "\t</Pass>\n");
-		}
-		fprintf(pFile, "</Material>\n");
-	}
-	fclose(pFile);
-	return true;
-
-	switch (material.type) {
-	case RAW_MATERIAL_TYPE_OPAQUE:
-		break;
-	case RAW_MATERIAL_TYPE_TRANSPARENT:
-		break;
-	case RAW_MATERIAL_TYPE_SKINNED_OPAQUE:
-		break;
-	case RAW_MATERIAL_TYPE_SKINNED_TRANSPARENT:
-		break;
-	}
-
-	if (material.info->shadingModel == RAW_SHADING_MODEL_PBR_MET_ROUGH) {
-		const RawMetRoughMatProps *props = (RawMetRoughMatProps *)material.info.get();
-	}
-	else {
-		const RawTraditionalMatProps *props = ((RawTraditionalMatProps *)material.info.get());
-
-		if (material.info->shadingModel == RAW_SHADING_MODEL_BLINN ||
-			material.info->shadingModel == RAW_SHADING_MODEL_PHONG) {
-		}
-	}
-
-	return true;
-}
-
-static char* GetModelFileName(char *szFileName, const char *szPathName, const RawModel &rawModel)
-{
-	sprintf(szFileName, "%s/%s.mesh", szPathName, rawModel.GetSurface(0).name.c_str());
-	return szFileName;
-}
-
-static char* GetMaterialFileName(char *szFileName, const char *szPathName, const RawMaterial &rawMaterial)
-{
-	sprintf(szFileName, "%s/%s.material", szPathName, rawMaterial.name.c_str());
-	return szFileName;
-}
-
 bool ExportMeshs(const char *szPathName, const RawModel &rawModel, const std::vector<RawModel> &rawMaterialModels, bool bWorldSpace)
 {
 	for (int index = 0; index < rawMaterialModels.size(); index++) {
-		char szFileName[_MAX_PATH];
-		GetModelFileName(szFileName, szPathName, rawMaterialModels[index]);
-		ExportMesh(szFileName, rawMaterialModels[index], rawModel, bWorldSpace);
+		std::string fileName = GetModelFileName(szPathName, rawMaterialModels[index].GetSurface(0));
+		ExportMesh(fileName.c_str(), rawMaterialModels[index], rawModel, bWorldSpace);
 	}
 
 	return true;
+}
+
+static bool ExportMaterial(const char *szFileName, const RawMaterial &material, const RawModel &raw)
+{
+	TiXmlDocument doc;
+	TiXmlElement *pMaterialNode = new TiXmlElement("Material");
+	{
+		for (int index = 0; index < RAW_TEXTURE_USAGE_MAX; index++) {
+			if (material.textures[index] == -1) {
+				continue;
+			}
+
+			TiXmlElement *pTextureNode = new TiXmlElement("Texture2D");
+			{
+				char szExt[_MAX_PATH];
+				char szFName[_MAX_PATH];
+				char szFileName[_MAX_PATH];
+				splitfilename(raw.GetTexture(material.textures[index]).fileName.c_str(), szFName, szExt);
+				sprintf(szFileName, "%s%s", szFName, szExt);
+
+				switch (material.textures[index]) {
+				case RAW_TEXTURE_USAGE_AMBIENT:   pTextureNode->SetAttributeString("name", "%s", "texAmbient");    break;
+				case RAW_TEXTURE_USAGE_DIFFUSE:   pTextureNode->SetAttributeString("name", "%s", "texDiffuse");    break;
+				case RAW_TEXTURE_USAGE_NORMAL:    pTextureNode->SetAttributeString("name", "%s", "texNormal");     break;
+				case RAW_TEXTURE_USAGE_SPECULAR:  pTextureNode->SetAttributeString("name", "%s", "texSpecular");   break;
+				case RAW_TEXTURE_USAGE_SHININESS: pTextureNode->SetAttributeString("name", "%s", "texShininess");  break;
+				case RAW_TEXTURE_USAGE_EMISSIVE:  pTextureNode->SetAttributeString("name", "%s", "texEmissive");   break;
+				case RAW_TEXTURE_USAGE_REFLECTION:pTextureNode->SetAttributeString("name", "%s", "texReflection"); break;
+				case RAW_TEXTURE_USAGE_ALBEDO:    pTextureNode->SetAttributeString("name", "%s", "texAlbedo");     break;
+				case RAW_TEXTURE_USAGE_OCCLUSION: pTextureNode->SetAttributeString("name", "%s", "texOcclusion");  break;
+				case RAW_TEXTURE_USAGE_ROUGHNESS: pTextureNode->SetAttributeString("name", "%s", "texRoughness");  break;
+				case RAW_TEXTURE_USAGE_METALLIC:  pTextureNode->SetAttributeString("name", "%s", "texMetallic");   break;
+				}
+				pTextureNode->SetAttributeString("file_name", "%s", szFileName);
+				pTextureNode->SetAttributeString("min_filter", "%s", "GL_LINEAR_MIPMAP_NEAREST");
+				pTextureNode->SetAttributeString("mag_filter", "%s", "GL_LINEAR");
+				pTextureNode->SetAttributeString("address_mode", "%s", "GL_CLAMP_TO_EDGE");
+			}
+			pMaterialNode->LinkEndChild(pTextureNode);
+		}
+	}
+	doc.LinkEndChild(pMaterialNode);
+	return doc.SaveFile(szFileName);
 }
 
 bool ExportMaterials(const char *szPathName, const RawModel &rawModel)
 {
 	for (int index = 0; index < rawModel.GetMaterialCount(); index++) {
-		char szFileName[_MAX_PATH];
-		GetMaterialFileName(szFileName, szPathName, rawModel.GetMaterial(index));
-		ExportMaterial(szFileName, rawModel.GetMaterial(index), rawModel);
+		std::string fileName = GetMaterialFileName(szPathName, rawModel.GetMaterial(index));
+		ExportMaterial(fileName.c_str(), rawModel.GetMaterial(index), rawModel);
 	}
 	return true;
 }
 
-bool ExportScene(const char *szPathName, const RawModel &rawModel)
+static void ExportNodeMesh(TiXmlElement *pParentNode, const RawNode &node, std::unordered_map<long, std::string> &surfaceMeshs, std::unordered_map<long, std::string> &surfaceMaterials)
+{
+	if (node.surfaceId != -1) {
+		TiXmlElement *pMeshNode = new TiXmlElement("Mesh");
+		{
+			pMeshNode->SetAttributeString("mesh", "%s", surfaceMeshs[node.surfaceId].c_str());
+			pMeshNode->SetAttributeString("material", "%s", surfaceMaterials[node.surfaceId].c_str());
+		}
+		pParentNode->LinkEndChild(pMeshNode);
+	}
+}
+
+static void ExportNode(TiXmlElement *pParentNode, const long id, const RawModel &rawModel, std::unordered_map<long, std::string> &surfaceMeshs, std::unordered_map<long, std::string> &surfaceMaterials)
+{
+	TiXmlElement *pCurrentNode = new TiXmlElement("Node");
+	{
+		const RawNode &node = rawModel.GetNode(rawModel.GetNodeById(id));
+		pCurrentNode->SetAttributeString("translation", "%f %f %f", node.translation.x, node.translation.y, node.translation.z);
+		pCurrentNode->SetAttributeString("rotation", "%f %f %f %f", node.rotation[1], node.rotation[2], node.rotation[3], node.rotation[0]);
+		pCurrentNode->SetAttributeString("scale", "%f %f %f", node.scale.x, node.scale.y, node.scale.z);
+
+		ExportNodeMesh(pCurrentNode, node, surfaceMeshs, surfaceMaterials);
+
+		for (int indexChild = 0; indexChild < node.childIds.size(); indexChild++) {
+			ExportNode(pCurrentNode, node.childIds[indexChild], rawModel, surfaceMeshs, surfaceMaterials);
+		}
+	}
+	pParentNode->LinkEndChild(pCurrentNode);
+}
+
+bool ExportScene(const char *szPathName, const RawModel &rawModel, const std::vector<RawModel> &rawMaterialModels)
 {
 	char szFileName[_MAX_PATH];
 	sprintf(szFileName, "%s/Scene.xml", szPathName);
 
-	FILE *pFile = fopen(szFileName, "wb");
-	if (pFile == NULL) return false;
-	{
-		fprintf(pFile, "<Scene>\n");
-		{
-
-		}
-		fprintf(pFile, "</Scene>\n");
+	std::unordered_map<long, std::string> surfaceMeshs;
+	std::unordered_map<long, std::string> surfaceMaterials;
+	for (int index = 0; index < rawMaterialModels.size(); index++) {
+		long id = rawMaterialModels[index].GetSurface(0).id;
+		surfaceMeshs[id] = GetModelFileName(".", rawMaterialModels[index].GetSurface(0));
+		surfaceMaterials[id] = GetMaterialFileName(".", rawMaterialModels[index].GetMaterial(0));
 	}
-	fclose(pFile);
-	return true;
+
+	TiXmlDocument doc;
+	TiXmlElement *pSceneNode = new TiXmlElement("Scene");
+	{
+		ExportNode(pSceneNode, rawModel.GetRootNode(), rawModel, surfaceMeshs, surfaceMaterials);
+	}
+	doc.LinkEndChild(pSceneNode);
+	return doc.SaveFile(szFileName);
 }

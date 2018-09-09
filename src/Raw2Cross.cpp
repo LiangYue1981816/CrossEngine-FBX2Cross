@@ -134,7 +134,7 @@ static std::string GetMaterialFileName(const char *szPathName, const RawMaterial
 	return std::string(szFileName);
 }
 
-static bool ExportMesh(const char *szFileName, const RawModel &model, const RawModel &raw, bool bWorldSpace)
+static bool ExportMesh(const char *szFileName, const RawModel &model, const RawModel &rawModel, bool bWorldSpace)
 {
 	unsigned int format = model.GetVertexAttributes();
 
@@ -174,17 +174,17 @@ static bool ExportMesh(const char *szFileName, const RawModel &model, const RawM
 			0.0f, 0.0f, 1.0f, 0.0f, 
 			0.0f, 0.0f, 0.0f, 1.0f);
 
-		long indexNode = raw.GetNodeById(model.GetSurface(0).skeletonRootId);
+		long indexNode = rawModel.GetNodeById(model.GetSurface(0).skeletonRootId);
 
 		while (indexNode != -1) {
-			RawNode node = raw.GetNode(indexNode);
+			RawNode node = rawModel.GetNode(indexNode);
 			{
 				Mat4f scale = Mat4f::FromScaleVector(node.scale);
 				Mat4f rotate = Mat4f::FromRotationMatrix(node.rotation.ToMatrix());
 				Mat4f translate = Mat4f::FromTranslationVector(node.translation);
 				matrix = matrix * translate * rotate * scale;
 			}
-			indexNode = raw.GetNodeById(node.parentId);
+			indexNode = rawModel.GetNodeById(node.parentId);
 		}
 
 		for (int index = 0; index < vertices.size(); index++) {
@@ -297,7 +297,7 @@ bool ExportMeshs(const char *szPathName, const RawModel &rawModel, const std::ve
 	return true;
 }
 
-static bool ExportMaterial(const char *szFileName, const RawMaterial &material, const RawModel &raw)
+static bool ExportMaterial(const char *szFileName, const RawMaterial &material, const RawModel &rawModel)
 {
 	TiXmlDocument doc;
 	TiXmlElement *pMaterialNode = new TiXmlElement("Material");
@@ -312,7 +312,7 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 				char szExt[_MAX_PATH];
 				char szFName[_MAX_PATH];
 				char szFileName[_MAX_PATH];
-				splitfilename(raw.GetTexture(material.textures[index]).fileName.c_str(), szFName, szExt);
+				splitfilename(rawModel.GetTexture(material.textures[index]).fileName.c_str(), szFName, szExt);
 				sprintf(szFileName, "%s%s", szFName, szExt);
 
 				switch (material.textures[index]) {
@@ -327,6 +327,7 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 				case RAW_TEXTURE_USAGE_OCCLUSION: pTextureNode->SetAttributeString("name", "%s", "texOcclusion");  break;
 				case RAW_TEXTURE_USAGE_ROUGHNESS: pTextureNode->SetAttributeString("name", "%s", "texRoughness");  break;
 				case RAW_TEXTURE_USAGE_METALLIC:  pTextureNode->SetAttributeString("name", "%s", "texMetallic");   break;
+				default:                          pTextureNode->SetAttributeString("name", "%s", "texDiffuse");    break;
 				}
 				pTextureNode->SetAttributeString("file_name", "%s", szFileName);
 				pTextureNode->SetAttributeString("min_filter", "%s", "GL_LINEAR_MIPMAP_NEAREST");

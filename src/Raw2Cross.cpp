@@ -351,7 +351,7 @@ bool ExportMaterials(const char *szPathName, const RawModel &rawModel)
 
 static void ExportNodeMesh(TiXmlElement *pParentNode, const RawNode &node, std::unordered_map<long, std::string> &surfaceMeshs, std::unordered_map<long, std::string> &surfaceMaterials)
 {
-	if (node.surfaceId != -1) {
+	if (node.surfaceId != 0) {
 		TiXmlElement *pMeshNode = new TiXmlElement("Mesh");
 		{
 			pMeshNode->SetAttributeString("mesh", "%s", surfaceMeshs[node.surfaceId].c_str());

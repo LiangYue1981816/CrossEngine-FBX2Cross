@@ -307,6 +307,13 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 				continue;
 			}
 
+			TiXmlElement *pProgramNode = new TiXmlElement("Program");
+			{
+				pProgramNode->SetAttributeString("vertex_file_name", "Default.vert");
+				pProgramNode->SetAttributeString("fragment_file_name", "Default.frag");
+			}
+			pMaterialNode->LinkEndChild(pProgramNode);
+
 			TiXmlElement *pTextureNode = new TiXmlElement("Texture2D");
 			{
 				char szExt[_MAX_PATH];

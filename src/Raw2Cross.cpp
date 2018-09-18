@@ -395,8 +395,8 @@ bool ExportScene(const char *szPathName, const RawModel &rawModel, const std::ve
 	std::unordered_map<long, std::string> surfaceMaterials;
 	for (int index = 0; index < rawMaterialModels.size(); index++) {
 		long id = rawMaterialModels[index].GetSurface(0).id;
-		surfaceMeshs[id] = GetModelFileName(".", rawMaterialModels[index].GetSurface(0));
-		surfaceMaterials[id] = GetMaterialFileName(".", rawMaterialModels[index].GetMaterial(0));
+		surfaceMeshs[id] = GetModelFileName("./", rawMaterialModels[index].GetSurface(0));
+		surfaceMaterials[id] = GetMaterialFileName("./", rawMaterialModels[index].GetMaterial(0));
 	}
 
 	TiXmlDocument doc;

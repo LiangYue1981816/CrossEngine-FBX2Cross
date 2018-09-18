@@ -123,14 +123,14 @@ static unsigned int GetVertexSize(unsigned int format)
 static std::string GetModelFileName(const char *szPathName, const RawSurface &rawSurface)
 {
 	char szFileName[_MAX_PATH];
-	sprintf(szFileName, "%s/%s.mesh", szPathName, rawSurface.name.c_str());
+	sprintf(szFileName, "%s%s.mesh", szPathName, rawSurface.name.c_str());
 	return std::string(szFileName);
 }
 
 static std::string GetMaterialFileName(const char *szPathName, const RawMaterial &rawMaterial)
 {
 	char szFileName[_MAX_PATH];
-	sprintf(szFileName, "%s/%s.material", szPathName, rawMaterial.name.c_str());
+	sprintf(szFileName, "%s%s.material", szPathName, rawMaterial.name.c_str());
 	return std::string(szFileName);
 }
 
@@ -315,7 +315,7 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 				splitfilename(rawModel.GetTexture(material.textures[index]).fileName.c_str(), szFName, szExt);
 				sprintf(szFileName, "%s%s", szFName, szExt);
 
-				switch (material.textures[index]) {
+				switch (index) {
 				case RAW_TEXTURE_USAGE_AMBIENT:   pTextureNode->SetAttributeString("name", "%s", "texAmbient");    break;
 				case RAW_TEXTURE_USAGE_DIFFUSE:   pTextureNode->SetAttributeString("name", "%s", "texDiffuse");    break;
 				case RAW_TEXTURE_USAGE_NORMAL:    pTextureNode->SetAttributeString("name", "%s", "texNormal");     break;
@@ -327,7 +327,6 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 				case RAW_TEXTURE_USAGE_OCCLUSION: pTextureNode->SetAttributeString("name", "%s", "texOcclusion");  break;
 				case RAW_TEXTURE_USAGE_ROUGHNESS: pTextureNode->SetAttributeString("name", "%s", "texRoughness");  break;
 				case RAW_TEXTURE_USAGE_METALLIC:  pTextureNode->SetAttributeString("name", "%s", "texMetallic");   break;
-				default:                          pTextureNode->SetAttributeString("name", "%s", "texDiffuse");    break;
 				}
 				pTextureNode->SetAttributeString("file_name", "%s", szFileName);
 				pTextureNode->SetAttributeString("min_filter", "%s", "GL_LINEAR_MIPMAP_NEAREST");

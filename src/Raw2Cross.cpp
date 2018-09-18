@@ -302,17 +302,17 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 	TiXmlDocument doc;
 	TiXmlElement *pMaterialNode = new TiXmlElement("Material");
 	{
+		TiXmlElement *pProgramNode = new TiXmlElement("Program");
+		{
+			pProgramNode->SetAttributeString("vertex_file_name", "Default.vert");
+			pProgramNode->SetAttributeString("fragment_file_name", "Default.frag");
+		}
+		pMaterialNode->LinkEndChild(pProgramNode);
+
 		for (int index = 0; index < RAW_TEXTURE_USAGE_MAX; index++) {
 			if (material.textures[index] == -1) {
 				continue;
 			}
-
-			TiXmlElement *pProgramNode = new TiXmlElement("Program");
-			{
-				pProgramNode->SetAttributeString("vertex_file_name", "Default.vert");
-				pProgramNode->SetAttributeString("fragment_file_name", "Default.frag");
-			}
-			pMaterialNode->LinkEndChild(pProgramNode);
 
 			TiXmlElement *pTextureNode = new TiXmlElement("Texture2D");
 			{

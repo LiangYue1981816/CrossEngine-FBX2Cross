@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 		fmt::printf("Loading FBX File: %s\n", inputPath);
 	}
 
-    if (LoadFBXFile(rawModel, inputPath.c_str(), "bmp;png;jpg;jpeg") == false) {
+    if (LoadFBXFile(rawModel, inputPath.c_str(), "tga;bmp;png;jpg;jpeg") == false) {
 		fmt::fprintf(stderr, "ERROR:: Failed to parse FBX: %s\n", inputPath.c_str());
         return 1;
     }

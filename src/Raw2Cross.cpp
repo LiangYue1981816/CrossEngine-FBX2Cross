@@ -338,7 +338,7 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 				pTextureNode->SetAttributeString("file_name", "%s", szFileName);
 				pTextureNode->SetAttributeString("min_filter", "%s", "GL_LINEAR_MIPMAP_NEAREST");
 				pTextureNode->SetAttributeString("mag_filter", "%s", "GL_LINEAR");
-				pTextureNode->SetAttributeString("address_mode", "%s", "GL_CLAMP_TO_EDGE");
+				pTextureNode->SetAttributeString("address_mode", "%s", "GL_REPEAT");
 			}
 			pMaterialNode->LinkEndChild(pTextureNode);
 		}

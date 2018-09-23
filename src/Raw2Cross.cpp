@@ -324,7 +324,7 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 
 				switch (index) {
 				case RAW_TEXTURE_USAGE_AMBIENT:   pTextureNode->SetAttributeString("name", "%s", "texAmbient");    break;
-				case RAW_TEXTURE_USAGE_DIFFUSE:   pTextureNode->SetAttributeString("name", "%s", "texDiffuse");    break;
+				case RAW_TEXTURE_USAGE_DIFFUSE:   pTextureNode->SetAttributeString("name", "%s", "texAlbedo");     break;
 				case RAW_TEXTURE_USAGE_NORMAL:    pTextureNode->SetAttributeString("name", "%s", "texNormal");     break;
 				case RAW_TEXTURE_USAGE_SPECULAR:  pTextureNode->SetAttributeString("name", "%s", "texSpecular");   break;
 				case RAW_TEXTURE_USAGE_SHININESS: pTextureNode->SetAttributeString("name", "%s", "texShininess");  break;

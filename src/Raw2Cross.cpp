@@ -302,46 +302,73 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 	TiXmlDocument doc;
 	TiXmlElement *pMaterialNode = new TiXmlElement("Material");
 	{
-		TiXmlElement *pProgramNode = new TiXmlElement("Program");
+		TiXmlElement *pPassNode = new TiXmlElement("Pass");
 		{
-			pProgramNode->SetAttributeString("vertex_file_name", "Default.vert");
-			pProgramNode->SetAttributeString("fragment_file_name", "Default.frag");
-		}
-		pMaterialNode->LinkEndChild(pProgramNode);
+			pPassNode->SetAttributeString("name", "Default");
 
-		for (int index = 0; index < RAW_TEXTURE_USAGE_MAX; index++) {
-			if (material.textures[index] == -1) {
-				continue;
-			}
-
-			TiXmlElement *pTextureNode = new TiXmlElement("Texture2D");
+			TiXmlElement *pPipelineNode = new TiXmlElement("Pipeline");
 			{
-				char szExt[_MAX_PATH];
-				char szFName[_MAX_PATH];
-				char szFileName[_MAX_PATH];
-				splitfilename(rawModel.GetTexture(material.textures[index]).fileName.c_str(), szFName, szExt);
-				sprintf(szFileName, "%s%s", szFName, szExt);
+				TiXmlElement *pVertexNode = new TiXmlElement("Vertex");
+				{
+					pVertexNode->SetAttributeString("file_name", "Default.glsl");
 
-				switch (index) {
-				case RAW_TEXTURE_USAGE_AMBIENT:   pTextureNode->SetAttributeString("name", "%s", "texAmbient");    break;
-				case RAW_TEXTURE_USAGE_DIFFUSE:   pTextureNode->SetAttributeString("name", "%s", "texAlbedo");     break;
-				case RAW_TEXTURE_USAGE_NORMAL:    pTextureNode->SetAttributeString("name", "%s", "texNormal");     break;
-				case RAW_TEXTURE_USAGE_SPECULAR:  pTextureNode->SetAttributeString("name", "%s", "texSpecular");   break;
-				case RAW_TEXTURE_USAGE_SHININESS: pTextureNode->SetAttributeString("name", "%s", "texShininess");  break;
-				case RAW_TEXTURE_USAGE_EMISSIVE:  pTextureNode->SetAttributeString("name", "%s", "texEmissive");   break;
-				case RAW_TEXTURE_USAGE_REFLECTION:pTextureNode->SetAttributeString("name", "%s", "texReflection"); break;
-				case RAW_TEXTURE_USAGE_ALBEDO:    pTextureNode->SetAttributeString("name", "%s", "texAlbedo");     break;
-				case RAW_TEXTURE_USAGE_OCCLUSION: pTextureNode->SetAttributeString("name", "%s", "texOcclusion");  break;
-				case RAW_TEXTURE_USAGE_ROUGHNESS: pTextureNode->SetAttributeString("name", "%s", "texRoughness");  break;
-				case RAW_TEXTURE_USAGE_METALLIC:  pTextureNode->SetAttributeString("name", "%s", "texMetallic");   break;
+					TiXmlElement *pDefineNode = new TiXmlElement("Define");
+					{
+						pDefineNode->SetAttributeString("name", "VERTEX_SHADER");
+					}
+					pVertexNode->LinkEndChild(pDefineNode);
 				}
-				pTextureNode->SetAttributeString("file_name", "%s", szFileName);
-				pTextureNode->SetAttributeString("min_filter", "%s", "GL_LINEAR_MIPMAP_NEAREST");
-				pTextureNode->SetAttributeString("mag_filter", "%s", "GL_LINEAR");
-				pTextureNode->SetAttributeString("address_mode", "%s", "GL_REPEAT");
+				pPipelineNode->LinkEndChild(pVertexNode);
+
+				TiXmlElement *pFragmentNode = new TiXmlElement("Fragment");
+				{
+					pFragmentNode->SetAttributeString("file_name", "Default.glsl");
+
+					TiXmlElement *pDefineNode = new TiXmlElement("Define");
+					{
+						pDefineNode->SetAttributeString("name", "FRAGMENT_SHADER");
+					}
+					pFragmentNode->LinkEndChild(pDefineNode);
+				}
+				pPipelineNode->LinkEndChild(pFragmentNode);
 			}
-			pMaterialNode->LinkEndChild(pTextureNode);
+			pPassNode->LinkEndChild(pPipelineNode);
+
+			for (int index = 0; index < RAW_TEXTURE_USAGE_MAX; index++) {
+				if (material.textures[index] == -1) {
+					continue;
+				}
+
+				TiXmlElement *pTextureNode = new TiXmlElement("Texture2D");
+				{
+					char szExt[_MAX_PATH];
+					char szFName[_MAX_PATH];
+					char szFileName[_MAX_PATH];
+					splitfilename(rawModel.GetTexture(material.textures[index]).fileName.c_str(), szFName, szExt);
+					sprintf(szFileName, "%s%s", szFName, szExt);
+
+					switch (index) {
+					case RAW_TEXTURE_USAGE_AMBIENT:   pTextureNode->SetAttributeString("name", "%s", "texAmbient");    break;
+					case RAW_TEXTURE_USAGE_DIFFUSE:   pTextureNode->SetAttributeString("name", "%s", "texAlbedo");     break;
+					case RAW_TEXTURE_USAGE_NORMAL:    pTextureNode->SetAttributeString("name", "%s", "texNormal");     break;
+					case RAW_TEXTURE_USAGE_SPECULAR:  pTextureNode->SetAttributeString("name", "%s", "texSpecular");   break;
+					case RAW_TEXTURE_USAGE_SHININESS: pTextureNode->SetAttributeString("name", "%s", "texShininess");  break;
+					case RAW_TEXTURE_USAGE_EMISSIVE:  pTextureNode->SetAttributeString("name", "%s", "texEmissive");   break;
+					case RAW_TEXTURE_USAGE_REFLECTION:pTextureNode->SetAttributeString("name", "%s", "texReflection"); break;
+					case RAW_TEXTURE_USAGE_ALBEDO:    pTextureNode->SetAttributeString("name", "%s", "texAlbedo");     break;
+					case RAW_TEXTURE_USAGE_OCCLUSION: pTextureNode->SetAttributeString("name", "%s", "texOcclusion");  break;
+					case RAW_TEXTURE_USAGE_ROUGHNESS: pTextureNode->SetAttributeString("name", "%s", "texRoughness");  break;
+					case RAW_TEXTURE_USAGE_METALLIC:  pTextureNode->SetAttributeString("name", "%s", "texMetallic");   break;
+					}
+					pTextureNode->SetAttributeString("file_name", "%s", szFileName);
+					pTextureNode->SetAttributeString("min_filter", "%s", "GL_LINEAR_MIPMAP_NEAREST");
+					pTextureNode->SetAttributeString("mag_filter", "%s", "GL_LINEAR");
+					pTextureNode->SetAttributeString("address_mode", "%s", "GL_REPEAT");
+				}
+				pPassNode->LinkEndChild(pTextureNode);
+			}
 		}
+		pMaterialNode->LinkEndChild(pPassNode);
 	}
 	doc.LinkEndChild(pMaterialNode);
 	return doc.SaveFile(szFileName);

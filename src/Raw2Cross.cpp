@@ -311,24 +311,12 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 				TiXmlElement *pVertexNode = new TiXmlElement("Vertex");
 				{
 					pVertexNode->SetAttributeString("file_name", "Default.glsl");
-
-					TiXmlElement *pDefineNode = new TiXmlElement("Define");
-					{
-						pDefineNode->SetAttributeString("name", "VERTEX_SHADER");
-					}
-					pVertexNode->LinkEndChild(pDefineNode);
 				}
 				pPipelineNode->LinkEndChild(pVertexNode);
 
 				TiXmlElement *pFragmentNode = new TiXmlElement("Fragment");
 				{
 					pFragmentNode->SetAttributeString("file_name", "Default.glsl");
-
-					TiXmlElement *pDefineNode = new TiXmlElement("Define");
-					{
-						pDefineNode->SetAttributeString("name", "FRAGMENT_SHADER");
-					}
-					pFragmentNode->LinkEndChild(pDefineNode);
 				}
 				pPipelineNode->LinkEndChild(pFragmentNode);
 			}

@@ -34,8 +34,6 @@ int main(int argc, char *argv[])
 {
 	std::string inputPath;
 	std::string outputPath;
-
-	bool worldSpace = false;
 	std::vector<std::function<Vec2f(Vec2f)>> texturesTransforms;
 
 	cxxopts::Options options(
@@ -47,7 +45,6 @@ int main(int argc, char *argv[])
 		("o,output", "Where to generate the output, without suffix.", cxxopts::value<std::string>(outputPath))
 		("flip-u", "Flip all U texture coordinates.")
 		("flip-v", "Flip all V texture coordinates (default behaviour!)")
-		("world", "Model in world space.")
 		("h,help", "Show this help.");
 
 	options.parse_positional("input");
@@ -80,10 +77,6 @@ int main(int argc, char *argv[])
 		texturesTransforms.emplace_back([](Vec2f uv) { return Vec2f(uv[0], 1.0f - uv[1]); });
 	}
 
-	if (options.count("world")) {
-		worldSpace = true;
-	}
-
 	RawModel rawModel;
 
 	if (verboseOutput) {
@@ -105,9 +98,18 @@ int main(int argc, char *argv[])
 	std::vector<RawModel> rawMaterialModels;
 	rawModel.CreateMaterialModels(rawMaterialModels, false, -1, true);
 
-	ExportMeshs(outputPath.c_str(), rawModel, rawMaterialModels, worldSpace);
-	ExportMaterials(outputPath.c_str(), rawModel);
-	ExportScene(outputPath.c_str(), rawModel, rawMaterialModels);
+	char szFName[_MAX_PATH] = { 0 };
+	char szFileName[_MAX_PATH] = { 0 };
+	char szMeshBinFileName[_MAX_PATH] = { 0 };
+	char szMeshXMLFileName[_MAX_PATH] = { 0 };
+	splitfilename(inputPath.c_str(), szFName, NULL);
+	sprintf(szFileName, "%s.mesh", szFName);
+	sprintf(szMeshBinFileName, "%s/%s.mesh", outputPath.c_str(), szFName);
+	sprintf(szMeshXMLFileName, "%s/%s.xml", outputPath.c_str(), szFName);
+
+	ExportMesh(szMeshBinFileName, rawModel, rawMaterialModels);
+	ExportMaterial(outputPath.c_str(), rawModel);
+	ExportMeshXML(szMeshXMLFileName, szFileName, rawModel, rawMaterialModels);
 
     return 0;
 }

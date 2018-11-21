@@ -14,8 +14,10 @@
 #include <string>
 #include "RawModel.h"
 
-bool ExportMeshs(const char *szPathName, const RawModel &rawModel, const std::vector<RawModel> &rawMaterialModels, bool bWorldSpace);
-bool ExportMaterials(const char *szPathName, const RawModel &rawModel);
-bool ExportScene(const char *szPathName, const RawModel &rawModel, const std::vector<RawModel> &rawMaterialModels);
+void splitfilename(const char *name, char *fname, char *ext);
+
+bool ExportMesh(const char *szFileName, const RawModel &rawModel, const std::vector<RawModel> &rawMaterialModels);
+bool ExportMaterial(const char *szPathName, const RawModel &rawModel);
+bool ExportMeshXML(const char *szFileName, const char *szMeshFileName, const RawModel &rawModel, const std::vector<RawModel> &rawMaterialModels);
 
 #endif // !__RAW2CROSS_H__

@@ -335,10 +335,10 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 					case RAW_TEXTURE_USAGE_METALLIC:  pTextureNode->SetAttributeString("name", "%s", "texMetallic");   break;
 					}
 					pTextureNode->SetAttributeString("file_name", "%s", szFileName);
-					pTextureNode->SetAttributeString("min_filter", "%s", "GFX_FILTER_LINEAR");
-					pTextureNode->SetAttributeString("mag_filter", "%s", "GFX_FILTER_LINEAR");
-					pTextureNode->SetAttributeString("mipmap_mode", "%s", "GFX_MIPMAP_MODE_NEAREST");
-					pTextureNode->SetAttributeString("address_mode", "%s", "GFX_ADDRESS_CLAMP_TO_EDGE");
+					pTextureNode->SetAttributeString("min_filter", "%s", "GFX_LINEAR");
+					pTextureNode->SetAttributeString("mag_filter", "%s", "GFX_LINEAR");
+					pTextureNode->SetAttributeString("mipmap_mode", "%s", "GFX_NEAREST");
+					pTextureNode->SetAttributeString("address_mode", "%s", "GFX_CLAMP_TO_EDGE");
 				}
 				pPassNode->LinkEndChild(pTextureNode);
 			}

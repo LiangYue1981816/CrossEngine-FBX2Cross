@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(FBX2glTF)
+project(FBX2Cross)
 
 if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR
@@ -133,10 +133,15 @@ set(SOURCE_FILES
         src/utils/File_Utils.cpp
         src/utils/Image_Utils.cpp
         src/utils/String_Utils.cpp
-        src/main.cpp
         src/Fbx2Raw.cpp
-        src/Raw2Gltf.cpp
         src/RawModel.cpp
+				src/MainCross.cpp
+				src/Raw2Cross.cpp
+				src/PVRTGeometry.cpp
+				src/tinystr.cpp
+				src/tinyxml.cpp
+				src/tinyxmlerror.cpp
+				src/tinyxmlparser.cpp
         src/glTF/BufferData.cpp
         src/glTF/MaterialData.cpp
         src/glTF/MeshData.cpp
@@ -154,9 +159,9 @@ set(SOURCE_FILES
         src/glTF/SceneData.cpp
 )
 
-add_executable(FBX2glTF ${SOURCE_FILES})
+add_executable(FBX2Cross ${SOURCE_FILES})
 
-add_dependencies(FBX2glTF
+add_dependencies(FBX2Cross
   Draco
   MathFu
   FiFoMap
@@ -169,13 +174,13 @@ add_dependencies(FBX2glTF
 
 if (NOT MSVC)
   # Disable annoying & spammy warning from FBX SDK header file
-  target_compile_options(FBX2glTF PRIVATE
+  target_compile_options(FBX2Cross PRIVATE
     "-Wno-null-dereference"
     "-Wunused"
     )
 endif()
 
-target_link_libraries(FBX2glTF
+target_link_libraries(FBX2Cross
   ${FRAMEWORKS}
   ${CMAKE_DL_LIBS}
   ${CMAKE_THREAD_LIBS_INIT}
@@ -185,7 +190,7 @@ target_link_libraries(FBX2glTF
   debug ${FBXSDK_LIBRARY_DEBUG}
 )
 
-target_include_directories(FBX2glTF PUBLIC
+target_include_directories(FBX2Cross PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${FBXSDK_INCLUDE_DIR}
   ${DRACO_INCLUDE_DIR}
@@ -198,4 +203,4 @@ target_include_directories(FBX2glTF PUBLIC
   ${FMT_INCLUDE_DIR}
 )
 
-install (TARGETS FBX2glTF DESTINATION bin)
+install (TARGETS FBX2Cross DESTINATION bin)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(FBX2Cross)
+project(FBX2Mesh)
 
 if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR
@@ -159,9 +159,9 @@ set(SOURCE_FILES
         src/glTF/SceneData.cpp
 )
 
-add_executable(FBX2Cross ${SOURCE_FILES})
+add_executable(FBX2Mesh ${SOURCE_FILES})
 
-add_dependencies(FBX2Cross
+add_dependencies(FBX2Mesh
   Draco
   MathFu
   FiFoMap
@@ -174,13 +174,13 @@ add_dependencies(FBX2Cross
 
 if (NOT MSVC)
   # Disable annoying & spammy warning from FBX SDK header file
-  target_compile_options(FBX2Cross PRIVATE
+  target_compile_options(FBX2Mesh PRIVATE
     "-Wno-null-dereference"
     "-Wunused"
     )
 endif()
 
-target_link_libraries(FBX2Cross
+target_link_libraries(FBX2Mesh
   ${FRAMEWORKS}
   ${CMAKE_DL_LIBS}
   ${CMAKE_THREAD_LIBS_INIT}
@@ -190,7 +190,7 @@ target_link_libraries(FBX2Cross
   debug ${FBXSDK_LIBRARY_DEBUG}
 )
 
-target_include_directories(FBX2Cross PUBLIC
+target_include_directories(FBX2Mesh PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${FBXSDK_INCLUDE_DIR}
   ${DRACO_INCLUDE_DIR}
@@ -203,4 +203,4 @@ target_include_directories(FBX2Cross PUBLIC
   ${FMT_INCLUDE_DIR}
 )
 
-install (TARGETS FBX2Cross DESTINATION bin)
+install (TARGETS FBX2Mesh DESTINATION bin)

@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
 	std::vector<std::function<Vec2f(Vec2f)>> texturesTransforms;
 
 	cxxopts::Options options(
-		"FBX2Cross",
-		"FBX2Cross 1.0: Generate a Mesh representation of an FBX model.");
+		"FBX2Mesh",
+		"FBX2Mesh 1.0: Generate a Mesh representation of an FBX model.");
 
 	options.add_options()
 		("i,input", "The FBX model to convert.", cxxopts::value<std::string>(inputPath))

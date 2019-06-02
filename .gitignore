@@ -4,3 +4,4 @@ npm/bin/Windows_NT/FBX2glTF.exe
 npm/node_modules/
 sdk/
 build/
+/ThirdParty/FBXSDK

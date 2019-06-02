@@ -294,6 +294,8 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 
 			TiXmlElement *pPipelineNode = new TiXmlElement("Pipeline");
 			{
+				pPipelineNode->SetAttributeString("render_pass", "Default");
+
 				TiXmlElement *pVertexNode = new TiXmlElement("Vertex");
 				{
 					pVertexNode->SetAttributeString("file_name", "Default.glsl");

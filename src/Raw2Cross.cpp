@@ -299,6 +299,53 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 				TiXmlElement *pVertexNode = new TiXmlElement("Vertex");
 				{
 					pVertexNode->SetAttributeString("file_name", "Default.glsl");
+
+					unsigned long format = rawModel.GetVertexAttributes();
+
+					if (format & RAW_VERTEX_ATTRIBUTE_POSITION) {
+						TiXmlElement *pDefineNode = new TiXmlElement("Define");
+						pDefineNode->SetAttributeString("name", "VERTEX_ATTRIBUTE_POSITION");
+						pVertexNode->LinkEndChild(pDefineNode);
+					}
+					if (format & RAW_VERTEX_ATTRIBUTE_NORMAL) {
+						TiXmlElement *pDefineNode = new TiXmlElement("Define");
+						pDefineNode->SetAttributeString("name", "VERTEX_ATTRIBUTE_NORMAL");
+						pVertexNode->LinkEndChild(pDefineNode);
+					}
+					if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
+						TiXmlElement *pDefineNode = new TiXmlElement("Define");
+						pDefineNode->SetAttributeString("name", "VERTEX_ATTRIBUTE_BINORMAL");
+						pVertexNode->LinkEndChild(pDefineNode);
+					}
+					if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
+						TiXmlElement *pDefineNode = new TiXmlElement("Define");
+						pDefineNode->SetAttributeString("name", "VERTEX_ATTRIBUTE_COLOR");
+						pVertexNode->LinkEndChild(pDefineNode);
+					}
+					if (format & RAW_VERTEX_ATTRIBUTE_UV0) {
+						TiXmlElement *pDefineNode = new TiXmlElement("Define");
+						pDefineNode->SetAttributeString("name", "VERTEX_ATTRIBUTE_TEXCOORD0");
+						pVertexNode->LinkEndChild(pDefineNode);
+					}
+					if (format & RAW_VERTEX_ATTRIBUTE_UV1) {
+						TiXmlElement *pDefineNode = new TiXmlElement("Define");
+						pDefineNode->SetAttributeString("name", "VERTEX_ATTRIBUTE_TEXCOORD1");
+						pVertexNode->LinkEndChild(pDefineNode);
+					}
+					if (format & RAW_VERTEX_ATTRIBUTE_JOINT_INDICES) {
+						TiXmlElement *pDefineNode = new TiXmlElement("Define");
+						pDefineNode->SetAttributeString("name", "VERTEX_ATTRIBUTE_INDICES");
+						pVertexNode->LinkEndChild(pDefineNode);
+					}
+					if (format & RAW_VERTEX_ATTRIBUTE_JOINT_WEIGHTS) {
+						TiXmlElement *pDefineNode = new TiXmlElement("Define");
+						pDefineNode->SetAttributeString("name", "VERTEX_ATTRIBUTE_WEIGHTS");
+						pVertexNode->LinkEndChild(pDefineNode);
+					}
+
+					TiXmlElement *pDefineNode = new TiXmlElement("Define");
+					pDefineNode->SetAttributeString("name", "INSTANCE_ATTRIBUTE_TRANSFORM");
+					pVertexNode->LinkEndChild(pDefineNode);
 				}
 				pPipelineNode->LinkEndChild(pVertexNode);
 
@@ -310,37 +357,26 @@ static bool ExportMaterial(const char *szFileName, const RawMaterial &material, 
 			}
 			pPassNode->LinkEndChild(pPipelineNode);
 
-			for (int index = 0; index < RAW_TEXTURE_USAGE_MAX; index++) {
-				if (material.textures[index] == -1) {
-					continue;
-				}
+			if (material.textures[RAW_TEXTURE_USAGE_DIFFUSE] >= 0 || material.textures[RAW_TEXTURE_USAGE_ALBEDO] >= 0) {
+				int indexTexture = -1;
+				indexTexture = material.textures[RAW_TEXTURE_USAGE_DIFFUSE] >= 0 ? RAW_TEXTURE_USAGE_DIFFUSE : indexTexture;
+				indexTexture = material.textures[RAW_TEXTURE_USAGE_ALBEDO] >= 0 ? RAW_TEXTURE_USAGE_ALBEDO : indexTexture;
 
 				TiXmlElement *pTextureNode = new TiXmlElement("Texture2D");
 				{
 					char szExt[_MAX_PATH];
 					char szFName[_MAX_PATH];
 					char szFileName[_MAX_PATH];
-					splitfilename(rawModel.GetTexture(material.textures[index]).fileName.c_str(), szFName, szExt);
+
+					splitfilename(rawModel.GetTexture(material.textures[indexTexture]).fileName.c_str(), szFName, szExt);
 					sprintf(szFileName, "%s%s", szFName, szExt);
 
-					switch (index) {
-					case RAW_TEXTURE_USAGE_AMBIENT:   pTextureNode->SetAttributeString("name", "%s", "texAmbient");    break;
-					case RAW_TEXTURE_USAGE_DIFFUSE:   pTextureNode->SetAttributeString("name", "%s", "texAlbedo");     break;
-					case RAW_TEXTURE_USAGE_NORMAL:    pTextureNode->SetAttributeString("name", "%s", "texNormal");     break;
-					case RAW_TEXTURE_USAGE_SPECULAR:  pTextureNode->SetAttributeString("name", "%s", "texSpecular");   break;
-					case RAW_TEXTURE_USAGE_SHININESS: pTextureNode->SetAttributeString("name", "%s", "texShininess");  break;
-					case RAW_TEXTURE_USAGE_EMISSIVE:  pTextureNode->SetAttributeString("name", "%s", "texEmissive");   break;
-					case RAW_TEXTURE_USAGE_REFLECTION:pTextureNode->SetAttributeString("name", "%s", "texReflection"); break;
-					case RAW_TEXTURE_USAGE_ALBEDO:    pTextureNode->SetAttributeString("name", "%s", "texAlbedo");     break;
-					case RAW_TEXTURE_USAGE_OCCLUSION: pTextureNode->SetAttributeString("name", "%s", "texOcclusion");  break;
-					case RAW_TEXTURE_USAGE_ROUGHNESS: pTextureNode->SetAttributeString("name", "%s", "texRoughness");  break;
-					case RAW_TEXTURE_USAGE_METALLIC:  pTextureNode->SetAttributeString("name", "%s", "texMetallic");   break;
-					}
-					pTextureNode->SetAttributeString("file_name", "%s", szFileName);
-					pTextureNode->SetAttributeString("min_filter", "%s", "GFX_NEAREST");
-					pTextureNode->SetAttributeString("mag_filter", "%s", "GFX_LINEAR");
-					pTextureNode->SetAttributeString("mipmap_mode", "%s", "GFX_NEAREST");
-					pTextureNode->SetAttributeString("address_mode", "%s", "GFX_CLAMP_TO_EDGE");
+					pTextureNode->SetAttributeString("name", "texAlbedo");
+					pTextureNode->SetAttributeString("file_name", szFileName);
+					pTextureNode->SetAttributeString("min_filter", "GFX_NEAREST");
+					pTextureNode->SetAttributeString("mag_filter", "GFX_LINEAR");
+					pTextureNode->SetAttributeString("mipmap_mode", "GFX_NEAREST");
+					pTextureNode->SetAttributeString("address_mode", "GFX_CLAMP_TO_EDGE");
 				}
 				pPassNode->LinkEndChild(pTextureNode);
 			}
@@ -366,7 +402,7 @@ static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, std::
 		TiXmlElement *pDrawNode = new TiXmlElement("Draw");
 		{
 			pDrawNode->SetAttributeInt1("index", surfaceMeshs[node.surfaceId]);
-			pDrawNode->SetAttributeString("material", "%s", surfaceMaterials[node.surfaceId].c_str());
+			pDrawNode->SetAttributeString("material", surfaceMaterials[node.surfaceId].c_str());
 		}
 		pParentNode->LinkEndChild(pDrawNode);
 	}
@@ -403,7 +439,7 @@ bool ExportMeshXML(const char *szFileName, const char *szMeshFileName, const Raw
 
 	TiXmlDocument doc;
 	TiXmlElement *pMeshNode = new TiXmlElement("Mesh");
-	pMeshNode->SetAttributeString("mesh", "%s", szMeshFileName);
+	pMeshNode->SetAttributeString("mesh", szMeshFileName);
 	{
 		ExportNode(pMeshNode, rawModel.GetRootNode(), rawModel, surfaceMeshs, surfaceMaterials);
 	}

@@ -403,6 +403,7 @@ static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, std::
 		{
 			pDrawNode->SetAttributeInt1("index", surfaceMeshs[node.surfaceId]);
 			pDrawNode->SetAttributeString("material", surfaceMaterials[node.surfaceId].c_str());
+			pDrawNode->SetAttributeInt1("mask", 0xffffffff);
 		}
 		pParentNode->LinkEndChild(pDrawNode);
 	}

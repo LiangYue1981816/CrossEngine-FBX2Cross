@@ -106,6 +106,8 @@ static bool ExportMeshHeader(FILE *pFile, const RawModel &rawModel, const std::v
 {
 	typedef struct SubMeshHeader
 	{
+		char szName[260];
+
 		float minx =  FLT_MAX;
 		float miny =  FLT_MAX;
 		float minz =  FLT_MAX;
@@ -162,6 +164,8 @@ static bool ExportMeshHeader(FILE *pFile, const RawModel &rawModel, const std::v
 
 		meshHeader.indexBufferSize += rawMaterialModels[indexMesh].GetTriangleCount() * 3 * sizeof(unsigned int);
 		meshHeader.vertexBufferSize += rawMaterialModels[indexMesh].GetVertexCount() * GetVertexSize(meshHeader.format);
+
+		strcpy(meshHeader.subMeshHeaders[indexMesh].szName, rawMaterialModels[indexMesh].GetSurface(0).name.c_str());
 
 		numIndex += rawMaterialModels[indexMesh].GetTriangleCount() * 3;
 		numVertex += rawMaterialModels[indexMesh].GetVertexCount();

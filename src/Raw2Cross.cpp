@@ -405,8 +405,8 @@ static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, const
 	if (node.surfaceId != 0) {
 		TiXmlElement *pDrawNode = new TiXmlElement("Draw");
 		{
-			pDrawNode->SetAttributeString("name", rawModel.GetSurface(rawModel.GetSurfaceById(node.surfaceId)).name.c_str());
 			pDrawNode->SetAttributeInt1("index", surfaceMeshs[node.surfaceId]);
+			pDrawNode->SetAttributeString("name", rawModel.GetSurface(rawModel.GetSurfaceById(node.surfaceId)).name.c_str());
 			pDrawNode->SetAttributeString("material", surfaceMaterials[node.surfaceId].c_str());
 		}
 		pParentNode->LinkEndChild(pDrawNode);

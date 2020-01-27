@@ -400,11 +400,12 @@ bool ExportMaterial(const char *szPathName, const RawModel &rawModel)
 	return true;
 }
 
-static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, std::unordered_map<long, long> &surfaceMeshs, std::unordered_map<long, std::string> &surfaceMaterials)
+static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, const RawModel &rawModel, std::unordered_map<long, long> &surfaceMeshs, std::unordered_map<long, std::string> &surfaceMaterials)
 {
 	if (node.surfaceId != 0) {
 		TiXmlElement *pDrawNode = new TiXmlElement("Draw");
 		{
+			pDrawNode->SetAttributeString("name", rawModel.GetSurface(rawModel.GetSurfaceById(node.surfaceId)).name.c_str());
 			pDrawNode->SetAttributeInt1("index", surfaceMeshs[node.surfaceId]);
 			pDrawNode->SetAttributeString("material", surfaceMaterials[node.surfaceId].c_str());
 		}
@@ -421,7 +422,7 @@ static void ExportNode(TiXmlElement *pParentNode, const long id, const RawModel 
 		pCurrentNode->SetAttributeString("rotation", "%f %f %f %f", node.rotation[1], node.rotation[2], node.rotation[3], node.rotation[0]);
 		pCurrentNode->SetAttributeString("scale", "%f %f %f", node.scale.x, node.scale.y, node.scale.z);
 
-		ExportNodeDraw(pCurrentNode, node, surfaceMeshs, surfaceMaterials);
+		ExportNodeDraw(pCurrentNode, node, rawModel, surfaceMeshs, surfaceMaterials);
 
 		for (int indexChild = 0; indexChild < node.childIds.size(); indexChild++) {
 			ExportNode(pCurrentNode, node.childIds[indexChild], rawModel, surfaceMeshs, surfaceMaterials);

@@ -400,9 +400,52 @@ bool ExportMaterial(const char *szPathName, const RawModel &rawModel)
 	return true;
 }
 
-static bool IsNodeLODGrpup(const RawNode &node)
+static bool IsNodeLODGrpup(const RawNode &node, const RawModel &rawModel)
 {
-	return node.name == "LODGroup";
+	// - LODGroup
+	//  |---LOD0
+	//  |   |---Mesh
+	//  |---LOD1
+	//  |   |---Mesh
+	//  |---LOD2
+	//      |--Mesh
+
+	if (node.name != "LODGroup") {
+		return false;
+	}
+
+	if (node.childIds.empty()) {
+		return false;
+	}
+
+	for (int indexChild = 0; indexChild < node.childIds.size(); indexChild++) {
+		const RawNode &childNode = rawModel.GetNode(rawModel.GetNodeById(node.childIds[indexChild]));
+
+		if (childNode.childIds.empty() == false) {
+			return false;
+		}
+
+		if (childNode.scale.x != 1.0f ||
+			childNode.scale.y != 1.0f ||
+			childNode.scale.z != 1.0f) {
+			return false;
+		}
+
+		if (childNode.translation.x != 0.0f ||
+			childNode.translation.y != 0.0f ||
+			childNode.translation.z != 0.0f) {
+			return false;
+		}
+
+		if (childNode.rotation[0] != 0.0f || 
+			childNode.rotation[1] != 0.0f ||
+			childNode.rotation[2] != 0.0f ||
+			childNode.rotation[3] != 1.0f) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, const RawModel &rawModel, std::unordered_map<long, long> &surfaceMeshs, std::unordered_map<long, std::string> &surfaceMaterials)

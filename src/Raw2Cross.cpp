@@ -400,6 +400,11 @@ bool ExportMaterial(const char *szPathName, const RawModel &rawModel)
 	return true;
 }
 
+static bool IsNodeLODGrpup(const RawNode &node)
+{
+	return node.name == "LODGroup";
+}
+
 static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, const RawModel &rawModel, std::unordered_map<long, long> &surfaceMeshs, std::unordered_map<long, std::string> &surfaceMaterials)
 {
 	if (node.surfaceId != 0) {

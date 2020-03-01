@@ -400,6 +400,17 @@ bool ExportMaterial(const char *szPathName, const RawModel &rawModel)
 	return true;
 }
 
+static bool IsNameLODGroup(const char* szName)
+{
+	const char* szLODGroup = "LODGroup";
+
+	if (strlen(szName) < strlen(szLODGroup)) {
+		return false;
+	}
+
+	return strncmp(szName, szLODGroup, strlen(szLODGroup)) == 0;
+}
+
 static bool IsNodeLODGrpup(const RawNode &node, const RawModel &rawModel)
 {
 	// - LODGroup
@@ -410,11 +421,11 @@ static bool IsNodeLODGrpup(const RawNode &node, const RawModel &rawModel)
 	//  |---LOD2
 	//      |--Mesh
 
-	if (node.name != "LODGroup") {
+	if (IsNameLODGroup(node.name.c_str()) == false) {
 		return false;
 	}
 
-	if (node.childIds.empty()) {
+	if (node.childIds.empty() == true) {
 		return false;
 	}
 
@@ -425,22 +436,22 @@ static bool IsNodeLODGrpup(const RawNode &node, const RawModel &rawModel)
 			return false;
 		}
 
-		if (childNode.scale.x != 1.0f ||
-			childNode.scale.y != 1.0f ||
-			childNode.scale.z != 1.0f) {
+		if (fabs(childNode.scale.x - 1.0f) > 0.0001f ||
+			fabs(childNode.scale.y - 1.0f) > 0.0001f ||
+			fabs(childNode.scale.z - 1.0f) > 0.0001f) {
 			return false;
 		}
 
-		if (childNode.translation.x != 0.0f ||
-			childNode.translation.y != 0.0f ||
-			childNode.translation.z != 0.0f) {
+		if (fabs(childNode.translation.x - 0.0f) > 0.0001f ||
+			fabs(childNode.translation.y - 0.0f) > 0.0001f ||
+			fabs(childNode.translation.z - 0.0f) > 0.0001f) {
 			return false;
 		}
 
-		if (childNode.rotation[0] != 0.0f || 
-			childNode.rotation[1] != 0.0f ||
-			childNode.rotation[2] != 0.0f ||
-			childNode.rotation[3] != 1.0f) {
+		if (fabs(childNode.rotation[0] - 1.0f) > 0.0001f ||
+			fabs(childNode.rotation[1] - 0.0f) > 0.0001f ||
+			fabs(childNode.rotation[2] - 0.0f) > 0.0001f ||
+			fabs(childNode.rotation[3] - 0.0f) > 0.0001f) {
 			return false;
 		}
 	}
@@ -476,8 +487,16 @@ static void ExportNode(TiXmlElement *pParentNode, const long id, const RawModel 
 
 		ExportNodeDraw(pCurrentNode, node, rawModel, surfaceMeshs, surfaceMaterials);
 
-		for (int indexChild = 0; indexChild < node.childIds.size(); indexChild++) {
-			ExportNode(pCurrentNode, node.childIds[indexChild], rawModel, surfaceMeshs, surfaceMaterials);
+		if (IsNodeLODGrpup(node, rawModel)) {
+			for (int indexChild = 0; indexChild < node.childIds.size(); indexChild++) {
+				const RawNode &childNode = rawModel.GetNode(rawModel.GetNodeById(node.childIds[indexChild]));
+				ExportNodeDraw(pCurrentNode, childNode, rawModel, surfaceMeshs, surfaceMaterials);
+			}
+		}
+		else {
+			for (int indexChild = 0; indexChild < node.childIds.size(); indexChild++) {
+				ExportNode(pCurrentNode, node.childIds[indexChild], rawModel, surfaceMeshs, surfaceMaterials);
+			}
 		}
 	}
 	pParentNode->LinkEndChild(pCurrentNode);

@@ -402,23 +402,18 @@ bool ExportMaterial(const char *szPathName, const RawModel &rawModel)
 
 static bool IsNameLODGroup(const char* szName)
 {
-	const char* szLODGroup = "LODGroup";
-
-	if (strlen(szName) < strlen(szLODGroup)) {
-		return false;
-	}
-
-	return strncmp(szName, szLODGroup, strlen(szLODGroup)) == 0;
+	const char* szCheckName = "_LODGroup";
+	return strstr(szName, szCheckName) != nullptr;
 }
 
 static bool IsNodeLODGrpup(const RawNode &node, const RawModel &rawModel)
 {
-	// - LODGroup
-	//  |---LOD0
+	// - XXX_LODGroup
+	//  |---XXX_LOD0
 	//  |   |---Mesh
-	//  |---LOD1
+	//  |---XXX_LOD1
 	//  |   |---Mesh
-	//  |---LOD2
+	//  |---XXX_LOD2
 	//      |--Mesh
 
 	if (IsNameLODGroup(node.name.c_str()) == false) {
@@ -459,7 +454,20 @@ static bool IsNodeLODGrpup(const RawNode &node, const RawModel &rawModel)
 	return true;
 }
 
-static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, const RawModel &rawModel, std::unordered_map<long, long> &surfaceMeshs, std::unordered_map<long, std::string> &surfaceMaterials)
+static int GetLODIndex(const char* szName)
+{
+	const char* szCheckNames[8] = { "_LOD0", "_LOD1", "_LOD2", "_LOD3", "_LOD4", "_LOD5", "_LOD6", "_LOD7" };
+
+	for (int indexLOD = 0; indexLOD < 8; indexLOD++) {
+		if (strstr(szName, szCheckNames[indexLOD]) != nullptr) {
+			return indexLOD;
+		}
+	}
+
+	return -1;
+}
+
+static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, const RawModel &rawModel, std::unordered_map<long, long> &surfaceMeshs, std::unordered_map<long, std::string> &surfaceMaterials, int lod = -1)
 {
 	if (node.surfaceId != 0) {
 		TiXmlElement *pDrawNode = new TiXmlElement("Draw");
@@ -469,7 +477,10 @@ static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, const
 			pDrawNode->SetAttributeString("material", surfaceMaterials[node.surfaceId].c_str());
 
 			// Default Parameters
-			pDrawNode->SetAttributeString("lod", "0");
+			if (lod >= 0) {
+				pDrawNode->SetAttributeInt1("lod", lod);
+			}
+
 			pDrawNode->SetAttributeString("mask", "4294967295");
 		}
 		pParentNode->LinkEndChild(pDrawNode);
@@ -490,7 +501,7 @@ static void ExportNode(TiXmlElement *pParentNode, const long id, const RawModel 
 		if (IsNodeLODGrpup(node, rawModel)) {
 			for (int indexChild = 0; indexChild < node.childIds.size(); indexChild++) {
 				const RawNode &childNode = rawModel.GetNode(rawModel.GetNodeById(node.childIds[indexChild]));
-				ExportNodeDraw(pCurrentNode, childNode, rawModel, surfaceMeshs, surfaceMaterials);
+				ExportNodeDraw(pCurrentNode, childNode, rawModel, surfaceMeshs, surfaceMaterials, GetLODIndex(childNode.name.c_str()));
 			}
 		}
 		else {

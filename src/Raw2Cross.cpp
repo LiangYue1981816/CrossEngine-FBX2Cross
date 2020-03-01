@@ -408,6 +408,10 @@ static void ExportNodeDraw(TiXmlElement *pParentNode, const RawNode &node, const
 			pDrawNode->SetAttributeInt1("index", surfaceMeshs[node.surfaceId]);
 			pDrawNode->SetAttributeString("name", rawModel.GetSurface(rawModel.GetSurfaceById(node.surfaceId)).name.c_str());
 			pDrawNode->SetAttributeString("material", surfaceMaterials[node.surfaceId].c_str());
+
+			// Default Parameters
+			pDrawNode->SetAttributeString("lod", "0");
+			pDrawNode->SetAttributeString("mask", "4294967295");
 		}
 		pParentNode->LinkEndChild(pDrawNode);
 	}

@@ -244,9 +244,11 @@ static bool ExportMeshData(FILE *pFile, const RawModel &rawModel, const std::vec
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
 			Vec3f binormal = vertices[index].binormal;
+			float sign = Vec3f::DotProduct(Vec3f::CrossProduct(vertices[index].binormal, vertices[index].normal), Vec3f(vertices[index].tangent.x, vertices[index].tangent.y, vertices[index].tangent.z)) > 0.0f ? 1.0f : -1.0f;
 			fwrite(&binormal.x, sizeof(binormal.x), 1, pFile);
 			fwrite(&binormal.y, sizeof(binormal.y), 1, pFile);
 			fwrite(&binormal.z, sizeof(binormal.z), 1, pFile);
+			fwrite(&sign, sizeof(sign), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
 			Vec4f color = vertices[index].color;

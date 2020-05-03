@@ -231,45 +231,53 @@ static bool ExportMeshData(FILE *pFile, const RawModel &rawModel, const std::vec
 
 	for (int index = 0; index < vertices.size(); index++) {
 		if (format & RAW_VERTEX_ATTRIBUTE_POSITION) {
-			fwrite(&vertices[index].position.x, sizeof(vertices[index].position.x), 1, pFile);
-			fwrite(&vertices[index].position.y, sizeof(vertices[index].position.y), 1, pFile);
-			fwrite(&vertices[index].position.z, sizeof(vertices[index].position.z), 1, pFile);
+			Vec3f position = vertices[index].position;
+			fwrite(&position.x, sizeof(position.x), 1, pFile);
+			fwrite(&position.y, sizeof(position.y), 1, pFile);
+			fwrite(&position.z, sizeof(position.z), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_NORMAL) {
-			fwrite(&vertices[index].normal.x, sizeof(vertices[index].normal.x), 1, pFile);
-			fwrite(&vertices[index].normal.y, sizeof(vertices[index].normal.y), 1, pFile);
-			fwrite(&vertices[index].normal.z, sizeof(vertices[index].normal.z), 1, pFile);
+			Vec3f normal = vertices[index].normal;
+			fwrite(&normal.x, sizeof(normal.x), 1, pFile);
+			fwrite(&normal.y, sizeof(normal.y), 1, pFile);
+			fwrite(&normal.z, sizeof(normal.z), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
-			fwrite(&vertices[index].binormal.x, sizeof(vertices[index].binormal.x), 1, pFile);
-			fwrite(&vertices[index].binormal.y, sizeof(vertices[index].binormal.y), 1, pFile);
-			fwrite(&vertices[index].binormal.z, sizeof(vertices[index].binormal.z), 1, pFile);
+			Vec3f binormal = vertices[index].binormal;
+			fwrite(&binormal.x, sizeof(binormal.x), 1, pFile);
+			fwrite(&binormal.y, sizeof(binormal.y), 1, pFile);
+			fwrite(&binormal.z, sizeof(binormal.z), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
-			fwrite(&vertices[index].color.x, sizeof(vertices[index].color.x), 1, pFile);
-			fwrite(&vertices[index].color.y, sizeof(vertices[index].color.y), 1, pFile);
-			fwrite(&vertices[index].color.z, sizeof(vertices[index].color.z), 1, pFile);
-//			fwrite(&vertices[index].color.w, sizeof(vertices[index].color.w), 1, pFile);
+			Vec4f color = vertices[index].color;
+			fwrite(&color.x, sizeof(color.x), 1, pFile);
+			fwrite(&color.y, sizeof(color.y), 1, pFile);
+			fwrite(&color.z, sizeof(color.z), 1, pFile);
+//			fwrite(&color.w, sizeof(color.w), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_UV0) {
-			fwrite(&vertices[index].uv0.x, sizeof(vertices[index].uv0.x), 1, pFile);
-			fwrite(&vertices[index].uv0.y, sizeof(vertices[index].uv0.y), 1, pFile);
+			Vec2f uv0 = vertices[index].uv0;
+			fwrite(&uv0.x, sizeof(uv0.x), 1, pFile);
+			fwrite(&uv0.y, sizeof(uv0.y), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_UV1) {
-			fwrite(&vertices[index].uv1.x, sizeof(vertices[index].uv1.x), 1, pFile);
-			fwrite(&vertices[index].uv1.y, sizeof(vertices[index].uv1.y), 1, pFile);
+			Vec2f uv1 = vertices[index].uv1;
+			fwrite(&uv1.x, sizeof(uv1.x), 1, pFile);
+			fwrite(&uv1.y, sizeof(uv1.y), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_JOINT_INDICES) {
-			fwrite(&vertices[index].jointIndices.x, sizeof(vertices[index].jointIndices.x), 1, pFile);
-			fwrite(&vertices[index].jointIndices.y, sizeof(vertices[index].jointIndices.y), 1, pFile);
-			fwrite(&vertices[index].jointIndices.z, sizeof(vertices[index].jointIndices.z), 1, pFile);
-			fwrite(&vertices[index].jointIndices.w, sizeof(vertices[index].jointIndices.w), 1, pFile);
+			Vec4i jointIndices = vertices[index].jointIndices;
+			fwrite(&jointIndices.x, sizeof(jointIndices.x), 1, pFile);
+			fwrite(&jointIndices.y, sizeof(jointIndices.y), 1, pFile);
+			fwrite(&jointIndices.z, sizeof(jointIndices.z), 1, pFile);
+			fwrite(&jointIndices.w, sizeof(jointIndices.w), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_JOINT_WEIGHTS) {
-			fwrite(&vertices[index].jointWeights.x, sizeof(vertices[index].jointWeights.x), 1, pFile);
-			fwrite(&vertices[index].jointWeights.y, sizeof(vertices[index].jointWeights.y), 1, pFile);
-			fwrite(&vertices[index].jointWeights.z, sizeof(vertices[index].jointWeights.z), 1, pFile);
-			fwrite(&vertices[index].jointWeights.w, sizeof(vertices[index].jointWeights.w), 1, pFile);
+			Vec4f jointWeights = vertices[index].jointWeights;
+			fwrite(&jointWeights.x, sizeof(jointWeights.x), 1, pFile);
+			fwrite(&jointWeights.y, sizeof(jointWeights.y), 1, pFile);
+			fwrite(&jointWeights.z, sizeof(jointWeights.z), 1, pFile);
+			fwrite(&jointWeights.w, sizeof(jointWeights.w), 1, pFile);
 		}
 	}
 

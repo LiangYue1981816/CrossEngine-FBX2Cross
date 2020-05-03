@@ -74,7 +74,7 @@ static unsigned int GetVertexSize(unsigned int format)
 		size += sizeof(float) * 3;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
-		size += sizeof(float) * 3;
+		size += sizeof(float) * 4;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
 		size += sizeof(float) * 3;

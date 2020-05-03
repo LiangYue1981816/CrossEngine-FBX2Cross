@@ -26,7 +26,7 @@
 #include "tinyxml.h"
 #include "tinystr.h"
 
-static void splitfilename(const char *name, char *fname, char *ext)
+void splitfilename(const char *name, char *fname, char *ext)
 {
 	const char *p = NULL;
 	const char *c = NULL;

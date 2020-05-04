@@ -71,13 +71,13 @@ static unsigned int GetVertexSize(unsigned int format)
 		size += sizeof(float) * 3;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_NORMAL) {
-		size += sizeof(float) * 3;
+		size += sizeof(int8_t) * 3;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
-		size += sizeof(float) * 4;
+		size += sizeof(int8_t) * 4;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
-		size += sizeof(float) * 3;
+		size += sizeof(uint8_t) * 3;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_UV0) {
 		size += sizeof(float) * 2;
@@ -86,10 +86,10 @@ static unsigned int GetVertexSize(unsigned int format)
 		size += sizeof(float) * 2;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_JOINT_INDICES) {
-		size += sizeof(float) * 4;
+		size += sizeof(uint8_t) * 4;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_JOINT_WEIGHTS) {
-		size += sizeof(float) * 4;
+		size += sizeof(uint8_t) * 4;
 	}
 
 	return size;
@@ -231,68 +231,74 @@ static bool ExportMeshData(FILE *pFile, const RawModel &rawModel, const std::vec
 
 	for (int index = 0; index < vertices.size(); index++) {
 		if (format & RAW_VERTEX_ATTRIBUTE_POSITION) {
-			Vec3f position = vertices[index].position;
-			fwrite(&position.x, sizeof(position.x), 1, pFile);
-			fwrite(&position.y, sizeof(position.y), 1, pFile);
-			fwrite(&position.z, sizeof(position.z), 1, pFile);
+			// 3 Component * 4 Byte = 12 Bytes
+			float x = vertices[index].position.x;
+			float y = vertices[index].position.y;
+			float z = vertices[index].position.z;
+			fwrite(&x, sizeof(x), 1, pFile);
+			fwrite(&y, sizeof(y), 1, pFile);
+			fwrite(&z, sizeof(z), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_NORMAL) {
-			Vec3f normal = vertices[index].normal;
-			int8_t x = FbxClamp<int>((int)(normal.x * INT8_MAX), INT8_MIN, INT8_MAX);
-			int8_t y = FbxClamp<int>((int)(normal.y * INT8_MAX), INT8_MIN, INT8_MAX);
-			int8_t z = FbxClamp<int>((int)(normal.z * INT8_MAX), INT8_MIN, INT8_MAX);
+			// 3 Component * 1 Byte = 3 Bytes
+			int8_t x = FbxClamp<int>((int)(vertices[index].normal.x * INT8_MAX), INT8_MIN, INT8_MAX);
+			int8_t y = FbxClamp<int>((int)(vertices[index].normal.y * INT8_MAX), INT8_MIN, INT8_MAX);
+			int8_t z = FbxClamp<int>((int)(vertices[index].normal.z * INT8_MAX), INT8_MIN, INT8_MAX);
 			fwrite(&x, sizeof(x), 1, pFile);
 			fwrite(&y, sizeof(y), 1, pFile);
 			fwrite(&z, sizeof(z), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
-			Vec3f binormal = vertices[index].binormal;
-			float sign = Vec3f::DotProduct(Vec3f::CrossProduct(vertices[index].binormal, vertices[index].normal), Vec3f(vertices[index].tangent.x, vertices[index].tangent.y, vertices[index].tangent.z)) < 0.0f ? -1.0f : 1.0f;
-			int8_t x = FbxClamp<int>((int)(binormal.x * INT8_MAX), INT8_MIN, INT8_MAX);
-			int8_t y = FbxClamp<int>((int)(binormal.y * INT8_MAX), INT8_MIN, INT8_MAX);
-			int8_t z = FbxClamp<int>((int)(binormal.z * INT8_MAX), INT8_MIN, INT8_MAX);
-			int8_t w = sign > 0.0f ? INT8_MAX : -INT8_MAX;
+			// 4 Component * 1 Byte = 4 Bytes
+			int8_t x = FbxClamp<int>((int)(vertices[index].binormal.x * INT8_MAX), INT8_MIN, INT8_MAX);
+			int8_t y = FbxClamp<int>((int)(vertices[index].binormal.y * INT8_MAX), INT8_MIN, INT8_MAX);
+			int8_t z = FbxClamp<int>((int)(vertices[index].binormal.z * INT8_MAX), INT8_MIN, INT8_MAX);
+			int8_t w = Vec3f::DotProduct(Vec3f::CrossProduct(vertices[index].binormal, vertices[index].normal), Vec3f(vertices[index].tangent.x, vertices[index].tangent.y, vertices[index].tangent.z)) < 0.0f ? -INT8_MAX : INT8_MAX;
 			fwrite(&x, sizeof(x), 1, pFile);
 			fwrite(&y, sizeof(y), 1, pFile);
 			fwrite(&z, sizeof(z), 1, pFile);
 			fwrite(&w, sizeof(w), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
-			Vec4f color = vertices[index].color;
-			uint8_t x = FbxClamp<int>((int)(color.x * UINT8_MAX), 0, UINT8_MAX);
-			uint8_t y = FbxClamp<int>((int)(color.y * UINT8_MAX), 0, UINT8_MAX);
-			uint8_t z = FbxClamp<int>((int)(color.z * UINT8_MAX), 0, UINT8_MAX);
+			// 3 Component * 1 Byte = 3 Bytes
+			uint8_t x = FbxClamp<int>((int)(vertices[index].color.x * UINT8_MAX), 0, UINT8_MAX);
+			uint8_t y = FbxClamp<int>((int)(vertices[index].color.y * UINT8_MAX), 0, UINT8_MAX);
+			uint8_t z = FbxClamp<int>((int)(vertices[index].color.z * UINT8_MAX), 0, UINT8_MAX);
 			fwrite(&x, sizeof(x), 1, pFile);
 			fwrite(&y, sizeof(y), 1, pFile);
 			fwrite(&z, sizeof(z), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_UV0) {
-			Vec2f uv0 = vertices[index].uv0;
-			fwrite(&uv0.x, sizeof(uv0.x), 1, pFile);
-			fwrite(&uv0.y, sizeof(uv0.y), 1, pFile);
+			// 2 Component * 4 Byte = 8 Bytes
+			float x = vertices[index].uv0.x;
+			float y = vertices[index].uv0.y;
+			fwrite(&x, sizeof(x), 1, pFile);
+			fwrite(&y, sizeof(y), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_UV1) {
-			Vec2f uv1 = vertices[index].uv1;
-			fwrite(&uv1.x, sizeof(uv1.x), 1, pFile);
-			fwrite(&uv1.y, sizeof(uv1.y), 1, pFile);
+			// 2 Component * 4 Byte = 8 Bytes
+			float x = vertices[index].uv1.x;
+			float y = vertices[index].uv1.y;
+			fwrite(&x, sizeof(x), 1, pFile);
+			fwrite(&y, sizeof(y), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_JOINT_INDICES) {
-			Vec4i jointIndices = vertices[index].jointIndices;
-			uint8_t x = FbxClamp<int>((int)jointIndices.x, 0, UINT8_MAX);
-			uint8_t y = FbxClamp<int>((int)jointIndices.y, 0, UINT8_MAX);
-			uint8_t z = FbxClamp<int>((int)jointIndices.z, 0, UINT8_MAX);
-			uint8_t w = FbxClamp<int>((int)jointIndices.w, 0, UINT8_MAX);
+			// 4 Component * 1 Byte = 4 Bytes
+			uint8_t x = FbxClamp<int>((int)vertices[index].jointIndices.x, 0, UINT8_MAX);
+			uint8_t y = FbxClamp<int>((int)vertices[index].jointIndices.y, 0, UINT8_MAX);
+			uint8_t z = FbxClamp<int>((int)vertices[index].jointIndices.z, 0, UINT8_MAX);
+			uint8_t w = FbxClamp<int>((int)vertices[index].jointIndices.w, 0, UINT8_MAX);
 			fwrite(&x, sizeof(x), 1, pFile);
 			fwrite(&y, sizeof(y), 1, pFile);
 			fwrite(&z, sizeof(z), 1, pFile);
 			fwrite(&w, sizeof(w), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_JOINT_WEIGHTS) {
-			Vec4f jointWeights = vertices[index].jointWeights;
-			uint8_t x = FbxClamp<int>((int)(jointWeights.x * UINT8_MAX), 0, UINT8_MAX);
-			uint8_t y = FbxClamp<int>((int)(jointWeights.y * UINT8_MAX), 0, UINT8_MAX);
-			uint8_t z = FbxClamp<int>((int)(jointWeights.z * UINT8_MAX), 0, UINT8_MAX);
-			uint8_t w = FbxClamp<int>((int)(jointWeights.w * UINT8_MAX), 0, UINT8_MAX);
+			// 4 Component * 1 Byte = 4 Bytes
+			uint8_t x = FbxClamp<int>((int)(vertices[index].jointWeights.x * UINT8_MAX), 0, UINT8_MAX);
+			uint8_t y = FbxClamp<int>((int)(vertices[index].jointWeights.y * UINT8_MAX), 0, UINT8_MAX);
+			uint8_t z = FbxClamp<int>((int)(vertices[index].jointWeights.z * UINT8_MAX), 0, UINT8_MAX);
+			uint8_t w = FbxClamp<int>((int)(vertices[index].jointWeights.w * UINT8_MAX), 0, UINT8_MAX);
 			fwrite(&x, sizeof(x), 1, pFile);
 			fwrite(&y, sizeof(y), 1, pFile);
 			fwrite(&z, sizeof(z), 1, pFile);

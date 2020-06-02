@@ -71,13 +71,13 @@ static unsigned int GetVertexSize(unsigned int format)
 		size += sizeof(float) * 3;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_NORMAL) {
-		size += sizeof(int8_t) * 3;
+		size += sizeof(int8_t) * 4;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
 		size += sizeof(int8_t) * 4;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
-		size += sizeof(uint8_t) * 3;
+		size += sizeof(uint8_t) * 4;
 	}
 	if (format & RAW_VERTEX_ATTRIBUTE_UV0) {
 		size += sizeof(float) * 2;
@@ -240,13 +240,15 @@ static bool ExportMeshData(FILE *pFile, const RawModel &rawModel, const std::vec
 			fwrite(&z, sizeof(z), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_NORMAL) {
-			// 3 Component * 1 Byte = 3 Bytes
+			// 4 Component * 1 Byte = 4 Bytes
 			int8_t x = FbxClamp<int>((int)(vertices[index].normal.x * INT8_MAX), INT8_MIN, INT8_MAX);
 			int8_t y = FbxClamp<int>((int)(vertices[index].normal.y * INT8_MAX), INT8_MIN, INT8_MAX);
 			int8_t z = FbxClamp<int>((int)(vertices[index].normal.z * INT8_MAX), INT8_MIN, INT8_MAX);
+			int8_t w = 0;
 			fwrite(&x, sizeof(x), 1, pFile);
 			fwrite(&y, sizeof(y), 1, pFile);
 			fwrite(&z, sizeof(z), 1, pFile);
+			fwrite(&w, sizeof(w), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_BINORMAL) {
 			// 4 Component * 1 Byte = 4 Bytes
@@ -260,13 +262,15 @@ static bool ExportMeshData(FILE *pFile, const RawModel &rawModel, const std::vec
 			fwrite(&w, sizeof(w), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_COLOR) {
-			// 3 Component * 1 Byte = 3 Bytes
+			// 4 Component * 1 Byte = 4 Bytes
 			uint8_t x = FbxClamp<int>((int)(vertices[index].color.x * UINT8_MAX), 0, UINT8_MAX);
 			uint8_t y = FbxClamp<int>((int)(vertices[index].color.y * UINT8_MAX), 0, UINT8_MAX);
 			uint8_t z = FbxClamp<int>((int)(vertices[index].color.z * UINT8_MAX), 0, UINT8_MAX);
+			uint8_t w = FbxClamp<int>((int)(vertices[index].color.w * UINT8_MAX), 0, UINT8_MAX);
 			fwrite(&x, sizeof(x), 1, pFile);
 			fwrite(&y, sizeof(y), 1, pFile);
 			fwrite(&z, sizeof(z), 1, pFile);
+			fwrite(&w, sizeof(w), 1, pFile);
 		}
 		if (format & RAW_VERTEX_ATTRIBUTE_UV0) {
 			// 2 Component * 4 Byte = 8 Bytes
